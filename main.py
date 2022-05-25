@@ -1,5 +1,6 @@
 import telebot
 import requests
+import json
 
 
 url = "https://hotels4.p.rapidapi.com/locations/v2/search"
@@ -12,5 +13,8 @@ headers = {
 }
 
 response = requests.request("GET", url, headers=headers, params=querystring)
+data = json.loads(response.text)
+with open('result.json', 'w') as file:
+    json.dump(data, file, indent=4)
 
-print(response.text)
+# print(data['suggestions'])
