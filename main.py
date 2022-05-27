@@ -1,36 +1,50 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import lowprice
+import hotels_api_requests
 from telebot import formatting
+from telebot.callback_data import CallbackData, CallbackDataFilter
+import time
 
 
+MAX_HOTELS = 10
+MAX_PHOTO = 10
+
+
+city_callback = CallbackData('destination_id', prefix='city')
 TOKEN = '5178171548:AAGudbH7zz4sJpE6UNW1e2DX5ALUhy6ZS9w'
 bot = telebot.TeleBot(TOKEN)
 
 
 def gen_markup():
-    markup = ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True, input_field_placeholder='123')
-    markup.row_width = 2
-    # markup.add(InlineKeyboardButton(text, callback_data="cb_yes"), InlineKeyboardButton("No", callback_data="cb_no"))
+    markup = InlineKeyboardMarkup()
+    # markup.row_width = 2)
     return markup
+
+
+def get_hotels_count(message):
+    bot.send_message(message.chat.id, message.text)
 
 
 def get_city(message):
     city = message.text
+    print(message)
 
-    cities = lowprice.get_cities()
+    destinations = hotels_api_requests.get_destinations()
     markup = gen_markup()
-    for i_city in cities:
-        city_str = f'{i_city["name"]}\n {i_city["caption"]}'
-
-        markup.add(KeyboardButton(city_str))
-    bot.send_message(message.chat.id, f'Вы запросили информацию по городу {city}', reply_markup=markup)
-    # markup = telebot.types.ReplyKeyboardRemove()
-    # bot.send_message(message.from_user.id, "Done with Keyboard", reply_markup=markup)
+    for i_dest in destinations:
+        markup.add(InlineKeyboardButton(
+            f'{i_dest["name"]}, {i_dest["caption"]}',
+            callback_data=city_callback.new(destination_id=i_dest['destinationId']))
+            )
+    bot.send_message(
+        message.chat.id, f'По запросу {city} мы нашли такие варианты:',
+        reply_markup=markup,
+        )
 
 
 @bot.message_handler(commands=['lowprice'])
-def send_welcome(message):
+def low_price(message):
     bot.send_message(message.chat.id, 'Введите город для поиска')
     bot.register_next_step_handler(message, get_city)
 
@@ -41,5 +55,25 @@ def answer(message: telebot.types.Message) -> None:
         bot.send_message(message.chat.id, 'Привет! Я будущий чат бот турагенства.')
 
 
-bot.infinity_polling()
+@bot.callback_query_handler(func=None)
+def callback(call: telebot.types.CallbackQuery):
+    callback_data: dict = city_callback.parse(callback_data=call.data)
+    if callback_data['@'] == 'city':
+        # bot.send_message(call.message.chat.id, callback_data['destination_id'])
+        bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+        # bot.edit_message_text(
+        #     chat_id=call.message.chat.id,
+        #     message_id=call.message.id,
+        #     text='Ищем отели...'
+        # )
+        time.sleep(1)
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.id,
+            text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
+            )
+        # bot.send_message(call.message.chat.id, f'Сколько отелей показать? Не больше {MAX_HOTELS}')
+        bot.register_next_step_handler(call.message, get_hotels_count)
 
+
+bot.infinity_polling()
