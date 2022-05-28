@@ -22,8 +22,10 @@ def gen_markup():
     return markup
 
 
-def get_hotels_count(message):
-    bot.send_message(message.chat.id, message.text)
+def show_hotels(message):
+    hotels = lowprice.hotel_attrs()
+    for i_hotel in hotels:
+        bot.send_message(message.chat.id, i_hotel, parse_mode='HTML')
 
 
 def get_city(message):
@@ -66,14 +68,14 @@ def callback(call: telebot.types.CallbackQuery):
         #     message_id=call.message.id,
         #     text='Ищем отели...'
         # )
-        time.sleep(1)
+        time.sleep(0.5)
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.id,
             text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
             )
         # bot.send_message(call.message.chat.id, f'Сколько отелей показать? Не больше {MAX_HOTELS}')
-        bot.register_next_step_handler(call.message, get_hotels_count)
+        bot.register_next_step_handler(call.message, show_hotels)
 
 
 bot.infinity_polling()

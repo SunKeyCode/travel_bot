@@ -35,14 +35,14 @@ def get_destinations():
 
 
 # Временная функция для тестов
-def get_hotels_by_destination_id(destination_id, request_headers):
+def hotels_by_destination_id(destination_id):
     with open(f'hotels_{destination_id}.json', 'r') as file:
         data = json.load(file)
 
     return data['data']['body']['searchResults']['results']
 
 
-# def get_hotels_by_destination_id(destination_id, request_headers):
+# def hotels_by_destination_id(destination_id, request_headers):
 #     querystring = {
 #         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2020-01-08",
 #         "checkOut": "2020-01-15", "adults1": "1", "sortOrder": "PRICE", "locale": "en_US", "currency": "USD"
