@@ -11,8 +11,8 @@ def hotel_attrs_to_string(hotels: List):
     strings = list()
     for i_hotel in hotels:
         hotel_content = list()
-        hotel_content.append('<ins><b>Название</b></ins>: {}'.format(i_hotel['name']))
-        hotel_content.append('<ins><b>Адрес</b></ins>: {}, {}, {}, {}, {}'.format(
+        hotel_content.append('<b>Название</b>: {}'.format(i_hotel['name']))
+        hotel_content.append('<b>Адрес</b>: {}, {}, {}, {}, {}'.format(
             i_hotel['address']['postalCode'],
             i_hotel['address']['countryName'],
             i_hotel['address']['region'],
@@ -20,7 +20,7 @@ def hotel_attrs_to_string(hotels: List):
             i_hotel['address']['streetAddress']
             )
         )
-        hotel_content.append('<ins><b>Расстояние от центра</b></ins>: {}'.format(i_hotel['landmarks'][0]['distance']))
+        hotel_content.append('<b>Расстояние от центра</b>: {}'.format(i_hotel['landmarks'][0]['distance']))
         strings.append('\n'.join(hotel_content))
 
     return strings
