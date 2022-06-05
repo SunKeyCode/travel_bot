@@ -1,5 +1,5 @@
 import telebot
-import hotels_api_requests
+import hotels_api
 from markup import destination_markup
 
 

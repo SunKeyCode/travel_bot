@@ -1,5 +1,15 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
-def hotels(req_data: Dict) -> List[dict]:
-    return req_data['data']['body']['searchResults']['results']
+def hotels_list(data: Dict, limit: Optional[int] = None) -> List[dict]:
+    if limit is None:
+        return data['data']['body']['searchResults']['results']
+    else:
+        return data['data']['body']['searchResults']['results'][:limit]
+
+
+def photo_list(data, limit: Optional[int] = None) -> List[dict]:
+    if limit is None:
+        return data['hotelImages']
+    else:
+        return data['hotelImages'][:limit]
