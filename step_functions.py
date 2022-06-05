@@ -1,7 +1,7 @@
 import hotels_api
 from markup import destination_markup, yes_no_markup
 from telebot.types import InputMediaPhoto
-from bot import bot
+from bot import bot, query_container
 import formatting
 import attributes
 import json
@@ -30,7 +30,7 @@ def show_photo(message):
         bot.register_next_step_handler(message, show_photo)
         return
 
-    # query_container.hotel_count = int(message.text)
+    query_container.hotel_count = int(message.text)
     markup = yes_no_markup()
     bot.send_message(message.chat.id, 'Показать фото отелей?', reply_markup=markup)
 
@@ -38,7 +38,7 @@ def show_photo(message):
 def print_hotels(message, no_photo=True):
     # hotels_list = lowprice.hotel_attrs(query_container.hotel_count)
     if no_photo:
-        hotels = attributes.hotels_list(hotels_api.hotels_by_destination('1506246'), limit=3)
+        hotels = attributes.hotels_list(hotels_api.hotels_by_destination('1506246'), limit=query_container.hotel_count)
         for i_hotel in hotels:
             bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML')
     else:
@@ -46,7 +46,7 @@ def print_hotels(message, no_photo=True):
 
 
 def _print_hotels(message) -> None:
-    hotels = attributes.hotels_list(hotels_api.hotels_by_destination('1506246'), limit=3)
+    hotels = attributes.hotels_list(hotels_api.hotels_by_destination('1506246'), limit=query_container.hotel_count)
 
     if not message.text.isdigit():
         bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
@@ -57,13 +57,14 @@ def _print_hotels(message) -> None:
         bot.register_next_step_handler(message, _print_hotels)
         return
 
-    # query_container.photo_count = int(message.text)
+    query_container.photo_count = int(message.text)
     with open('photo_634418464.json', 'r') as file:
         data = json.load(file)
     media = list()
 
-    for photo in attributes.photo_list(data, limit=3):
+    for photo in attributes.photo_list(data, limit=query_container.photo_count):
         media.append(InputMediaPhoto(formatting.format_photo(photo, 'z'), 'Hotel'))
     for i_hotel in hotels:
         bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML')
         bot.send_media_group(message.chat.id, media)
+    print(query_container)
