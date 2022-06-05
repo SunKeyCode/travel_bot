@@ -1,12 +1,15 @@
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, InputMediaPhoto
+from telebot.types import InputMediaPhoto
 import lowprice
 import hotels_api_requests
 from telebot import formatting
-from telebot.callback_data import CallbackData, CallbackDataFilter
+from telebot.callback_data import CallbackData
 import time
 import json
 from typing import Optional
+from markup import yes_no_markup, destination_markup
+from lowprice import lowprice_command
+from commands import LowPrice
 
 
 MAX_HOTELS = 10
@@ -23,17 +26,30 @@ class QueryContainer:
         self.photo_count: int = MAX_PHOTO
 
 
-city_callback = CallbackData('destination_id', prefix='destination')
-photo_callback = CallbackData('answer', prefix='photo')
 TOKEN = '5178171548:AAGudbH7zz4sJpE6UNW1e2DX5ALUhy6ZS9w'
 bot = telebot.TeleBot(TOKEN)
 query_container = QueryContainer()
 
 
-def gen_markup():
-    markup = InlineKeyboardMarkup()
-    # markup.row_width = 2)
-    return markup
+@bot.message_handler(commands=['lowprice'])
+def low_price(message):
+    # print(message)
+    bot.send_message(message.chat.id, 'Введите город для поиска')
+    bot.register_next_step_handler(message, get_destination)
+
+
+@bot.message_handler(content_types='text')
+def answer(message: telebot.types.Message) -> None:
+    bot.send_message(message.chat.id, 'Такая команда мне не понятна...')
+
+
+def get_destination(message):
+    destinations = hotels_api_requests.get_destinations()
+    markup = destination_markup(destinations)
+    bot.send_message(
+        message.chat.id, f'Что из этого Вы имели ввиду?:',
+        reply_markup=markup,
+    )
 
 
 def show_photo(message):
@@ -47,9 +63,7 @@ def show_photo(message):
         return
 
     query_container.hotel_count = int(message.text)
-    markup = gen_markup()
-    markup.add(InlineKeyboardButton('Да', callback_data=photo_callback.new(answer='yes')))
-    markup.add(InlineKeyboardButton('Нет', callback_data=photo_callback.new(answer='no')))
+    markup = yes_no_markup()
     bot.send_message(message.chat.id, 'Показать фото отелей?', reply_markup=markup)
 
 
@@ -75,34 +89,6 @@ def print_hotels(message) -> None:
     for i_hotel in hotels:
         bot.send_message(message.chat.id, i_hotel, parse_mode='HTML')
         bot.send_media_group(message.chat.id, media)
-
-
-def get_city(message):
-    city = message.text
-
-    destinations = hotels_api_requests.get_destinations()
-    markup = gen_markup()
-    for i_dest in destinations:
-        markup.add(InlineKeyboardButton(
-            f'{i_dest["name"]}, {i_dest["caption"]}',
-            callback_data=city_callback.new(destination_id=i_dest['destinationId']))
-            )
-    bot.send_message(
-        message.chat.id, f'По запросу {city} мы нашли такие варианты:',
-        reply_markup=markup,
-        )
-
-
-@bot.message_handler(commands=['lowprice'])
-def low_price(message):
-    bot.send_message(message.chat.id, 'Введите город для поиска')
-    bot.register_next_step_handler(message, get_city)
-
-
-@bot.message_handler(content_types='text')
-def answer(message: telebot.types.Message) -> None:
-    if message.text.lower() == 'привет':
-        bot.send_message(message.chat.id, 'Привет! Я будущий чат бот турагенства.')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'destination')

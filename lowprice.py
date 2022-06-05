@@ -5,6 +5,12 @@ import re
 from telebot import formatting
 from attributes import hotels
 from typing import Dict, List
+from markup import destination_markup
+import bot_func
+from main import bot
+
+
+
 
 
 def hotel_attrs_to_string(hotels: List):
@@ -26,7 +32,7 @@ def hotel_attrs_to_string(hotels: List):
     return strings
 
 
-def hotel_attrs(limit):
+def hotel_attrs(limit: int) -> List[str]:
     data = hotels_api_requests.hotels_by_destination('1506246')
     return hotel_attrs_to_string(hotels(data)[:limit])
 
