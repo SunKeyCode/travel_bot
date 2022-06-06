@@ -7,7 +7,7 @@ from bot import bot, query_container
 
 def first_step(message):
     bot.send_message(message.chat.id, 'Введите город для поиска')
-    bot.register_next_step_handler(message, step_functions.get_destination)
+    bot.register_next_step_handler(message, step_functions.print_destinations)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'destination')
@@ -23,7 +23,7 @@ def callback(call: CallbackQuery):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'photo')
-def callback(call: telebot.types.CallbackQuery):
+def callback(call: CallbackQuery):
     bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
     if call.data.split(':')[1] == 'yes':
         bot.edit_message_text(
@@ -41,7 +41,3 @@ def callback(call: telebot.types.CallbackQuery):
             text=f'Вот отели, которые я нашел:'
         )
         step_functions.print_hotels(message=call.message, no_photo=True)
-
-
-if __name__ == '__main__':
-    pass

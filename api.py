@@ -3,6 +3,7 @@ import json
 import re
 from typing import Dict, List
 
+
 headers = {
     "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
     "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
@@ -29,29 +30,23 @@ def get_photo(hotel_id: str) -> Dict:
 #     return data
 
 
-def destinations_remove_span(request_data: Dict) -> List:
-    for elem in request_data['suggestions'][0]['entities']:
-        elem['caption'] = re.findall(r'<span.+</span>, (.+)', elem['caption'])[0]
-    return request_data['suggestions'][0]['entities']
-
-
 # Временная функция для тестов
-def get_destinations():
-    with open('result.json', 'r') as file:
-        data = json.load(file)
-    return destinations_remove_span(data)
+# def get_destinations():
+#     with open('result.json', 'r') as file:
+#         data = json.load(file)
+#     return data
 
 
-# def get_destinations(request_headers: str):
-#     querystring = {"query": "new york", "locale": "en_US", "currency": "USD"}
-#     destinations_request = requests.get(
-#             'https://hotels4.p.rapidapi.com/locations/v2/search',
-#             headers=request_headers,
-#             params=querystring
-#         )
-#     data = json.loads(destinations_request.text)
-#
-#     return destinations_remove_span(data)
+def get_destinations(destination):
+    querystring = {"query": destination, "locale": "en_US", "currency": "USD"}
+    destinations_request = requests.get(
+            'https://hotels4.p.rapidapi.com/locations/v2/search',
+            headers=headers,
+            params=querystring
+        )
+    data = json.loads(destinations_request.text)
+
+    return data
 
 
 # Временная функция для тестов
