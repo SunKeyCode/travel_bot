@@ -1,10 +1,9 @@
 import hotels_api
-from markup import destination_markup, yes_no_markup
+from markup import destination_markup, yes_no_markup, link_markup
 from telebot.types import InputMediaPhoto
 from bot import bot, query_container
 import formatting
 import attributes
-import json
 
 
 MAX_HOTELS = 10
@@ -36,11 +35,12 @@ def show_photo(message):
 
 
 def print_hotels(message, no_photo=True):
-    # hotels_list = lowprice.hotel_attrs(query_container.hotel_count)
     if no_photo:
         hotels = attributes.hotels_list(hotels_api.hotels_by_destination('1506246'), limit=query_container.hotel_count)
         for i_hotel in hotels:
-            bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML')
+            url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
+            markup = link_markup('Перейти на страницу отеля ->', url)
+            bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML', reply_markup=markup)
     else:
         bot.register_next_step_handler(message, _print_hotels)
 
@@ -58,13 +58,20 @@ def _print_hotels(message) -> None:
         return
 
     query_container.photo_count = int(message.text)
-    with open('photo_634418464.json', 'r') as file:
-        data = json.load(file)
-    media = list()
+    # hotels_api.get_photo()
+    # with open('photo_634418464.json', 'r') as file:
+    #     response_data = json.load(file)
 
-    for photo in attributes.photo_list(data, limit=query_container.photo_count):
-        media.append(InputMediaPhoto(formatting.format_photo(photo, 'z'), 'Hotel'))
+    # for photo in attributes.photo_list(data, limit=query_container.photo_count):
+    #     media.append(InputMediaPhoto(formatting.format_photo(photo, 'z'), 'Hotel'))
     for i_hotel in hotels:
-        bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML')
+        hotel_id = attributes.get_hotel_id(i_hotel)
+        response_data = hotels_api.get_photo(hotel_id)
+        media = list()
+        for photo in attributes.photo_list(response_data, limit=query_container.photo_count):
+            media.append(InputMediaPhoto(formatting.format_photo(photo, 'z'), i_hotel['name']))
+        url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
+        markup = link_markup('Перейти на страницу отеля ->', url)
         bot.send_media_group(message.chat.id, media)
+        bot.send_message(message.chat.id, formatting.hotel_to_str(i_hotel), parse_mode='HTML', reply_markup=markup)
     print(query_container)

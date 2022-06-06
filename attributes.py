@@ -13,3 +13,7 @@ def photo_list(data, limit: Optional[int] = None) -> List[dict]:
         return data['hotelImages']
     else:
         return data['hotelImages'][:limit]
+
+
+def get_hotel_id(hotel: Dict) -> str:
+    return hotel['id']

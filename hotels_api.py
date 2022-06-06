@@ -9,24 +9,24 @@ headers = {
     }
 
 
-# def get_photo_data(hotel_id: str = '634418464') -> Dict:
-#     querystring = {"id": hotel_id}
-#     request = requests.get(
-#             'https://hotels4.p.rapidapi.com/properties/get-hotel-photos',
-#             headers=headers,
-#             params=querystring
-#         )
-#     data = json.loads(request.text)
-#
-#     return data
+def get_photo(hotel_id: str) -> Dict:
+    querystring = {"id": hotel_id}
+    request = requests.get(
+            'https://hotels4.p.rapidapi.com/properties/get-hotel-photos',
+            headers=headers,
+            params=querystring
+        )
+    data = json.loads(request.text)
+
+    return data
 
 
 # для тэстов
-def get_photo_data(hotel_id: str = '634418464') -> Dict:
-    with open('photo_634418464.json', 'r') as file:
-        data = json.load(file)
-
-    return data
+# def get_photo_data(hotel_id: str = '634418464') -> Dict:
+#     with open('photo_634418464.json', 'r') as file:
+#         data = json.load(file)
+#
+#     return data
 
 
 def destinations_remove_span(request_data: Dict) -> List:

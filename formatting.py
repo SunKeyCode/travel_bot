@@ -13,6 +13,7 @@ def hotel_to_str(hotel: Dict) -> str:
         )
     )
     hotel_content.append('<b>Расстояние от центра</b>: {}'.format(hotel['landmarks'][0]['distance']))
+    hotel_content.append('<b>Цена</b>: {}'.format(hotel['ratePlan']['price']['current']))
 
     return '\n'.join(hotel_content)
 

@@ -12,14 +12,12 @@ def first_step(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'destination')
 def callback(call: CallbackQuery):
-
     bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
         text=f'Сколько отелей показать? Не больше 10'
     )
-
     query_container.destination_id = call.data.split(':')[1]
     bot.register_next_step_handler(call.message, step_functions.show_photo)
 
@@ -33,7 +31,6 @@ def callback(call: telebot.types.CallbackQuery):
             message_id=call.message.id,
             text=f'Сколько фотографий показать? Не больше 10'
         )
-
         query_container.show_photo = True
         query_container.photo_count = call.data.split(':')[1]
         step_functions.print_hotels(message=call.message, no_photo=False)

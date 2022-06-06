@@ -23,3 +23,10 @@ def destination_markup(destinations):
         )
 
     return markup
+
+
+def link_markup(caption: str, url: str):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(caption, url=url))
+
+    return markup
