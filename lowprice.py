@@ -1,11 +1,11 @@
 import telebot
-from telebot.types import CallbackQuery
+from telebot.types import Message, CallbackQuery
 from typing import Dict, List
 import step_functions
-from bot import bot, query_container
+from bot import bot, query_container, MAX_HOTELS, MAX_PHOTO
 
 
-def first_step(message):
+def first_step(message: Message):
     bot.send_message(message.chat.id, 'Введите город для поиска')
     bot.register_next_step_handler(message, step_functions.print_destinations)
 
@@ -16,7 +16,7 @@ def callback(call: CallbackQuery):
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
-        text=f'Сколько отелей показать? Не больше 10'
+        text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
     )
     query_container.destination_id = call.data.split(':')[1]
     bot.register_next_step_handler(call.message, step_functions.show_photo)
@@ -29,7 +29,7 @@ def callback(call: CallbackQuery):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.id,
-            text=f'Сколько фотографий показать? Не больше 10'
+            text=f'Сколько фотографий показать? Не больше {MAX_PHOTO}'
         )
         query_container.show_photo = True
         query_container.photo_count = call.data.split(':')[1]

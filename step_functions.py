@@ -5,6 +5,7 @@ from bot import bot, query_container
 import format
 import attributes
 from logs import error_log
+from CustomExceptions import ApiRequestError
 
 
 MAX_HOTELS = 10
@@ -12,8 +13,24 @@ MAX_PHOTO = 10
 
 
 def print_destinations(message: Message) -> None:
-    response = api.get_destinations(message.text)
-    destinations = attributes.destinations(response)
+    try:
+        response = api.get_destinations(message.text)
+        destinations = attributes.destinations(response)
+    except KeyError:
+        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при расшифровке ответа от сервера. '
+                                          'Попробуйте повторить всё с начала.')
+        return
+    except ApiRequestError:
+        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при запросе к серверу. '
+                                          'Попробуйте повторить всё с начала.')
+        return
+    except Exception as exc:
+        error_log(exc, 'Непредвиденное исключение', print_destinations.__name__)
+        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так. '
+                                          'Попробуйте повторить всё с начала.')
+        print(f'Исключение в функции {print_destinations.__name__}', exc)
+        return
+
     if destinations:
         markup = destination_markup(destinations)
         bot.send_message(
@@ -21,7 +38,7 @@ def print_destinations(message: Message) -> None:
             reply_markup=markup,
             )
     else:
-        bot.send_message(message.chat.id, 'К сожалению я ничего не нашел по Вашему запросу...')
+        bot.send_message(message.chat.id, 'К сожалению, я ничего не нашел по Вашему запросу...')
 
 
 def show_photo(message):
@@ -89,4 +106,4 @@ def _print_hotels(message: Message) -> None:
         markup = link_markup('Перейти на страницу отеля ->', url)
         bot.send_media_group(message.chat.id, media)
         bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
-    print(query_container)
+    # print(query_container)
