@@ -18,7 +18,7 @@ def destination_markup(destinations):
     markup = InlineKeyboardMarkup()
     for item in destinations:
         markup.add(InlineKeyboardButton(
-            f'{item["name"]}, {item["caption"]}',
+            f'{item["caption"]}',
             callback_data=city_callback.new(destination_id=item['destinationId']))
         )
 

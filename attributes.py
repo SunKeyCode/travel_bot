@@ -25,10 +25,10 @@ def photo(data, limit: Optional[int] = None) -> List[dict]:
 def destinations(request_data: Dict) -> List[Dict]:
     for elem in request_data['suggestions'][0]['entities']:
         try:
-            elem['caption'] = re.findall(r'<span.+</span>, (.+)', elem['caption'])[0]   #не забыть поправить span для London !!!!!!!!!!!!!!!!!
+            elem['caption'] = re.sub(r'<[/]?span.{0,}?>', '', elem['caption'])
         except IndexError as exc:
-            logs.error_log(exc, f"Ошибка в строке {elem['caption']}", destinations.__name__)
             print(f'При форматировании строки {elem} возникла ошибка', exc)
+            logs.error_log(exc, f"Ошибка в строке {elem['caption']}", destinations.__name__)
     return request_data['suggestions'][0]['entities']
 
 
