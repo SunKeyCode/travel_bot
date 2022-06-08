@@ -17,6 +17,7 @@ class QueryContainer:
         self.hotel_count: int = MAX_HOTELS
         self.show_photo: bool = False
         self.photo_count: int = MAX_PHOTO
+        self.language = 'en_US'
 
     def __str__(self):
         return 'destination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \

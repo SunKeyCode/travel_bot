@@ -22,7 +22,7 @@ def photo(data, limit: Optional[int] = None) -> List[dict]:
         else:
             return data['hotelImages'][:limit]
     except KeyError as exc:
-        print(exc)
+        print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, 'Ошибка ключа', photo.__name__)
         raise KeyError(f'Ошибка ключа в функции {photo.__name__}')
 
@@ -37,7 +37,7 @@ def destinations(request_data: Dict) -> List[Dict]:
     try:
         return request_data['suggestions'][0]['entities']
     except KeyError as exc:
-        print(exc)
+        print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, 'Ошибка ключа', destinations.__name__)
         raise KeyError(f'Ошибка ключа в функции {destinations.__name__}')
 
@@ -46,6 +46,6 @@ def get_hotel_id(hotel: Dict) -> str:
     try:
         return hotel['id']
     except KeyError as exc:
-        print(exc)
+        print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, 'Ошибка ключа', get_hotel_id.__name__)
         raise KeyError(f'Ошибка ключа в функции {get_hotel_id.__name__}')

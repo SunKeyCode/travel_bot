@@ -6,30 +6,52 @@ import format
 import attributes
 from logs import error_log
 from CustomExceptions import ApiRequestError
+from typing import Callable
+import functools
+from re import fullmatch
 
 
 MAX_HOTELS = 10
 MAX_PHOTO = 10
 
 
+def track_exception(func: Callable) -> Callable:
+    """Декоратор для отслеживания исключений KeyError, ApiRequestError и Exception"""
+    @functools.wraps(func)
+    def wrapper(message: Message, *args, **kwargs):
+        try:
+            return func(message, *args, **kwargs)
+        except KeyError:
+            bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при расшифровке ответа от сервера. '
+                                              'Попробуйте повторить всё с начала.')
+        except ApiRequestError:
+            bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при запросе к серверу. '
+                                              'Попробуйте повторить всё с начала.')
+        except Exception as exc:
+            error_log(exc, 'Непредвиденное исключение', func.__name__)
+            bot.send_message(message.chat.id, 'Упс... Что-то пошло не так. '
+                                              'Попробуйте повторить всё с начала.')
+            print(f'Исключение в функции {func.__name__}', exc)
+
+    return wrapper
+
+
+def define_lang(text: str) -> str:
+    if fullmatch(r'[а-яА-Я\W\d]+', text) is not None:
+        return 'ru_RU'
+    else:
+        return 'en_US'
+
+
+@track_exception
 def print_destinations(message: Message) -> None:
-    try:
-        response = api.get_destinations(message.text)
-        destinations = attributes.destinations(response)
-    except KeyError:
-        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при расшифровке ответа от сервера. '
-                                          'Попробуйте повторить всё с начала.')
-        return
-    except ApiRequestError:
-        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так при запросе к серверу. '
-                                          'Попробуйте повторить всё с начала.')
-        return
-    except Exception as exc:
-        error_log(exc, 'Непредвиденное исключение', print_destinations.__name__)
-        bot.send_message(message.chat.id, 'Упс... Что-то пошло не так. '
-                                          'Попробуйте повторить всё с начала.')
-        print(f'Исключение в функции {print_destinations.__name__}', exc)
-        return
+
+    lang = define_lang(message.text)
+
+    query_container.language = lang
+
+    response = api.get_destinations(message.text, language=lang)
+    destinations = attributes.destinations(response)
 
     if destinations:
         markup = destination_markup(destinations)
@@ -56,12 +78,15 @@ def show_photo(message):
     bot.send_message(message.chat.id, 'Показать фото отелей?', reply_markup=markup)
 
 
+@track_exception
 def print_hotels(message, no_photo=True):
     if no_photo:
+
         hotels = attributes.hotels(
-            api.hotels_by_destination(query_container.destination_id),
+            api.hotels_by_destination(query_container.destination_id, language=query_container.language),
             limit=query_container.hotel_count
         )
+
         for i_hotel in hotels:
             url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
             markup = link_markup('Перейти на страницу отеля ->', url)
@@ -70,6 +95,7 @@ def print_hotels(message, no_photo=True):
         bot.register_next_step_handler(message, _print_hotels)
 
 
+@track_exception
 def _print_hotels(message: Message) -> None:
     if not message.text.isdigit():
         bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
@@ -79,31 +105,23 @@ def _print_hotels(message: Message) -> None:
         bot.send_message(message.chat.id, f'Количество должно быть от 1 до {MAX_PHOTO}')
         bot.register_next_step_handler(message, _print_hotels)
         return
-    try:
-        hotels = attributes.hotels(
-            api.hotels_by_destination(query_container.destination_id),
-            limit=query_container.hotel_count
-        )
-    except Exception as exc:
-        bot.send_message(message.chat.id, 'Что-то пошло не так при запросе списка отелей...')
-        error_log(exc, 'Ошибка при попытке получения отеля по destination_id.')
-        raise exc
+
+    hotels = attributes.hotels(
+        api.hotels_by_destination(query_container.destination_id, language=query_container.language),
+        limit=query_container.hotel_count
+    )
 
     query_container.photo_count = int(message.text)
-    # api.get_photo()
-    # with open('photo_634418464.json', 'r') as file:
-    #     response_data = json.load(file)
 
-    # for photo in attributes.photo(data, limit=query_container.photo_count):
-    #     media.append(InputMediaPhoto(formatting.format_photo(photo, 'z'), 'Hotel'))
     for i_hotel in hotels:
         hotel_id = attributes.get_hotel_id(i_hotel)
         response_data = api.get_photo(hotel_id)
+
         media = list()
         for photo in attributes.photo(response_data, limit=query_container.photo_count):
             media.append(InputMediaPhoto(format.format_photo(photo, 'z'), i_hotel['name']))
+
         url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
         markup = link_markup('Перейти на страницу отеля ->', url)
         bot.send_media_group(message.chat.id, media)
         bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
-    # print(query_container)

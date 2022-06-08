@@ -10,6 +10,8 @@ headers = {
     "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
     }
 
+# написать декоратор для отслеживания ошибок
+
 
 def get_photo(hotel_id: str) -> Dict:
     querystring = {"id": hotel_id}
@@ -24,15 +26,15 @@ def get_photo(hotel_id: str) -> Dict:
 
         data = json.loads(request.text)
     except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{get_destinations.__name__}')
+        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{get_photo.__name__}')
         print('Ошибка при работе с requests:', exc)
         raise ApiRequestError
 
     return data
 
 
-def get_destinations(destination):
-    querystring = {"query": destination, "locale": "en_US", "currency": "USD"}
+def get_destinations(destination: str, language: str = 'en_US') -> Dict:
+    querystring = {"query": destination, "locale": language, "currency": "USD"}
     try:
         request = requests.get(
                 'https://hotels4.p.rapidapi.com/locations/v2/search',
@@ -46,15 +48,15 @@ def get_destinations(destination):
     except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
         error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{get_destinations.__name__}')
         print('Ошибка при работе с requests:', exc)
-        raise ApiRequestError
+        raise ApiRequestError('Ошибка в функции get_destinations')
 
     return data
 
 
-def hotels_by_destination(destination_id, sort_order='PRICE'):
+def hotels_by_destination(destination_id, language='en_US', sort_order='PRICE'):
     querystring = {
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2020-01-08",
-        "checkOut": "2020-01-15", "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
+        "checkOut": "2020-01-15", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
     }
     try:
         request = requests.get(
@@ -66,7 +68,7 @@ def hotels_by_destination(destination_id, sort_order='PRICE'):
 
         data = json.loads(request.text)
     except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-        error_log(exc, 'Ошибка при работе с requests', hotels_by_destination.__name__)
+        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{hotels_by_destination.__name__}')
         print('Ошибка при работе с requests:', exc)
         raise ApiRequestError
 

@@ -1,9 +1,6 @@
 import time
-
-import telebot
 import lowprice
-from telebot import formatting
-from typing import Optional
+from telebot.types import Message
 from bot import bot
 from logs import error_log
 
@@ -13,12 +10,12 @@ MAX_PHOTO = 10
 
 
 @bot.message_handler(commands=['lowprice'])
-def low_price(message):
+def low_price(message: Message) -> None:
     lowprice.first_step(message)
 
 
 @bot.message_handler(content_types='text')
-def answer(message: telebot.types.Message) -> None:
+def answer(message: Message) -> None:
     bot.send_message(message.chat.id, 'Такая команда мне не понятна...')
 
 
