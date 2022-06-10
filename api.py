@@ -20,7 +20,7 @@ def get_photo(hotel_id: str) -> Dict:
                 'https://hotels4.p.rapidapi.com/properties/get-hotel-photos',
                 headers=headers,
                 params=querystring,
-                timeout=15
+                timeout=20
         )
         request.raise_for_status()
 
@@ -40,7 +40,7 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
                 'https://hotels4.p.rapidapi.com/locations/v2/search',
                 headers=headers,
                 params=querystring,
-                timeout=15
+                timeout=20
         )
         request.raise_for_status()
 
@@ -62,7 +62,8 @@ def hotels_by_destination(destination_id, language='en_US', sort_order='PRICE'):
         request = requests.get(
             'https://hotels4.p.rapidapi.com/properties/list',
             headers=headers,
-            params=querystring
+            params=querystring,
+            timeout=20
         )
         request.raise_for_status()
 

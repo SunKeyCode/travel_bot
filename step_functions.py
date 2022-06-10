@@ -1,7 +1,7 @@
 import api
 from markup import destination_markup, yes_no_markup, link_markup
 from telebot.types import Message, InputMediaPhoto
-from bot import bot, query_container
+from bot import bot, query_container, queries
 import format
 import attributes
 from logs import error_log
@@ -48,7 +48,7 @@ def print_destinations(message: Message) -> None:
 
     lang = define_lang(message.text)
 
-    query_container.language = lang
+    queries[message.chat.id].language = lang
 
     response = api.get_destinations(message.text, language=lang)
     destinations = attributes.destinations(response)
@@ -73,24 +73,29 @@ def show_photo(message):
         bot.register_next_step_handler(message, show_photo)
         return
 
-    query_container.hotel_count = int(message.text)
+    queries[message.chat.id].hotel_count = int(message.text)
+
     markup = yes_no_markup()
     bot.send_message(message.chat.id, 'Показать фото отелей?', reply_markup=markup)
 
 
 @track_exception
-def print_hotels(message, no_photo=True):
+def print_hotels(message: Message, no_photo=True):
     if no_photo:
 
         hotels = attributes.hotels(
-            api.hotels_by_destination(query_container.destination_id, language=query_container.language),
-            limit=query_container.hotel_count
+            api.hotels_by_destination(
+                destination_id=queries[message.chat.id].destination_id,
+                language=queries[message.chat.id].language
+            ),
+            limit=queries[message.chat.id].hotel_count
         )
 
         for i_hotel in hotels:
             url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
             markup = link_markup('Перейти на страницу отеля ->', url)
             bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
+        print(queries[message.chat.id])
     else:
         bot.register_next_step_handler(message, _print_hotels)
 
@@ -107,21 +112,26 @@ def _print_hotels(message: Message) -> None:
         return
 
     hotels = attributes.hotels(
-        api.hotels_by_destination(query_container.destination_id, language=query_container.language),
-        limit=query_container.hotel_count
+        api.hotels_by_destination(
+            destination_id=queries[message.chat.id].destination_id,
+            language=queries[message.chat.id].language
+        ),
+        limit=queries[message.chat.id].hotel_count
     )
 
-    query_container.photo_count = int(message.text)
+    queries[message.chat.id].photo_count = int(message.text)
 
     for i_hotel in hotels:
         hotel_id = attributes.get_hotel_id(i_hotel)
         response_data = api.get_photo(hotel_id)
 
         media = list()
-        for photo in attributes.photo(response_data, limit=query_container.photo_count):
+        for photo in attributes.photo(data=response_data, limit=queries[message.chat.id].photo_count):
             media.append(InputMediaPhoto(format.format_photo(photo, 'z'), i_hotel['name']))
 
         url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
         markup = link_markup('Перейти на страницу отеля ->', url)
         bot.send_media_group(message.chat.id, media)
         bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
+
+    print(queries[message.chat.id])
