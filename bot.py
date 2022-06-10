@@ -9,6 +9,9 @@ MAX_HOTELS = 10
 MAX_PHOTO = 10
 
 
+queries = dict()
+
+
 class QueryContainer:
 
     def __init__(self):
@@ -21,12 +24,13 @@ class QueryContainer:
 
     def __str__(self):
         return 'destination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \
-                'show_photo={show_photo}\nphoto_count={photo_count}'.format(
+                'show_photo={show_photo}\nphoto_count={photo_count}\nlang={language}'.format(
                     destination_id=self.destination_id,
                     hotels=self.hotels,
                     hotel_count=self.hotel_count,
                     show_photo=self.show_photo,
-                    photo_count=self.photo_count
+                    photo_count=self.photo_count,
+                    language=self.language
                 )
 
 
