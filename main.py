@@ -1,9 +1,9 @@
 import time
 import lowprice
+import highprice
 from telebot.types import Message
 from bot import bot
 from logs import error_log
-from markup import command_markup
 
 
 MAX_HOTELS = 10
@@ -38,6 +38,11 @@ def help_command(message: Message) -> None:
 @bot.message_handler(commands=['lowprice'])
 def low_price_command(message: Message) -> None:
     lowprice.first_step(message)
+
+
+@bot.message_handler(commands=['highprice'])
+def high_price_command(message: Message) -> None:
+    highprice.first_step(message)
 
 
 @bot.message_handler(content_types='text')

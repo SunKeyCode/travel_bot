@@ -54,10 +54,15 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
 
 
 def hotels_by_destination(destination_id, language='en_US', sort_order='PRICE'):
+    # querystring = {
+    #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
+    #     "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
+    # }
     querystring = {
-        "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2020-01-08",
-        "checkOut": "2020-01-15", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
+        "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
+        "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
     }
+    print(querystring)
     try:
         request = requests.get(
             'https://hotels4.p.rapidapi.com/properties/list',

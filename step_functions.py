@@ -1,7 +1,7 @@
 import api
 from markup import destination_markup, yes_no_markup, link_markup
 from telebot.types import Message, InputMediaPhoto
-from bot import bot, query_container, queries
+from bot import bot, queries
 import format
 import attributes
 from logs import error_log
@@ -13,6 +13,20 @@ from re import fullmatch
 
 MAX_HOTELS = 10
 MAX_PHOTO = 10
+
+
+def define_lang(text: str) -> str:
+    if fullmatch(r'[а-яА-Я\W\d]+', text) is not None:
+        return 'ru_RU'
+    else:
+        return 'en_US'
+
+
+def get_sort_order(command: str) -> str:
+    if command == 'lowprice':
+        return 'PRICE'
+    elif command == 'highprice':
+        return 'PRICE_HIGHEST_FIRST'
 
 
 def track_exception(func: Callable) -> Callable:
@@ -36,11 +50,13 @@ def track_exception(func: Callable) -> Callable:
     return wrapper
 
 
-def define_lang(text: str) -> str:
-    if fullmatch(r'[а-яА-Я\W\d]+', text) is not None:
-        return 'ru_RU'
-    else:
-        return 'en_US'
+def print_start_message(message: Message) -> None:
+    bot.send_message(message.chat.id, 'Вы можете использовать следующие команды:\n\n '
+                                      '/lowprice - топ самых дешёвых отелей в городе.\n'
+                                      '/highprice - топ самых дорогих отелей в городе.\n'
+                                      '/bestdeal - топ отелей, '
+                                      'наиболее подходящих по цене и расположению от центра.\n'
+                                      '/history - показать историю поиска отелей.')
 
 
 @track_exception
@@ -61,6 +77,7 @@ def print_destinations(message: Message) -> None:
             )
     else:
         bot.send_message(message.chat.id, 'К сожалению, я ничего не нашел по Вашему запросу...')
+        print_start_message(message)
 
 
 def show_photo(message):
@@ -86,7 +103,8 @@ def print_hotels(message: Message, no_photo=True):
         hotels = attributes.hotels(
             api.hotels_by_destination(
                 destination_id=queries[message.chat.id].destination_id,
-                language=queries[message.chat.id].language
+                language=queries[message.chat.id].language,
+                sort_order=get_sort_order(queries[message.chat.id].command)
             ),
             limit=queries[message.chat.id].hotel_count
         )
@@ -96,6 +114,7 @@ def print_hotels(message: Message, no_photo=True):
             markup = link_markup('Перейти на страницу отеля ->', url)
             bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
         print(queries[message.chat.id])
+        print_start_message(message)
     else:
         bot.register_next_step_handler(message, _print_hotels)
 
@@ -114,7 +133,8 @@ def _print_hotels(message: Message) -> None:
     hotels = attributes.hotels(
         api.hotels_by_destination(
             destination_id=queries[message.chat.id].destination_id,
-            language=queries[message.chat.id].language
+            language=queries[message.chat.id].language,
+            sort_order=get_sort_order(queries[message.chat.id].command)
         ),
         limit=queries[message.chat.id].hotel_count
     )
@@ -134,4 +154,4 @@ def _print_hotels(message: Message) -> None:
         bot.send_media_group(message.chat.id, media)
         bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
 
-    print(queries[message.chat.id])
+    print_start_message(message)

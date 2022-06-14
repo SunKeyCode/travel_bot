@@ -1,12 +1,12 @@
 from telebot.types import Message, CallbackQuery
 import step_functions
-from bot import bot, query_container, queries, QueryContainer, MAX_HOTELS, MAX_PHOTO
+from bot import bot, queries, QueryContainer, MAX_HOTELS, MAX_PHOTO
 from typing import Dict
 
 
 def first_step(message: Message):
     bot.send_message(message.chat.id, 'Введите название города для поиска:')
-    queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(message.chat.id)
+    queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(user=message.chat.id, command='lowprice')
     bot.register_next_step_handler(message, step_functions.print_destinations)
 
 
@@ -19,7 +19,6 @@ def destination_callback(call: CallbackQuery):
         text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
     )
     queries[call.message.chat.id].destination_id = call.data.split(':')[1]
-    query_container.destination_id = call.data.split(':')[1]
     bot.register_next_step_handler(call.message, step_functions.show_photo)
 
 
@@ -34,8 +33,6 @@ def photo_callback(call: CallbackQuery):
         )
         queries[call.message.chat.id].show_photo = True
         queries[call.message.chat.id].photo_count = call.data.split(':')[1]
-        query_container.show_photo = True
-        query_container.photo_count = call.data.split(':')[1]
         step_functions.print_hotels(message=call.message, no_photo=False)
     elif call.data.split(':')[1] == 'no':
         bot.edit_message_text(
