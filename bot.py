@@ -1,4 +1,5 @@
 import telebot
+from datetime import datetime
 from typing import Optional, Dict
 
 
@@ -13,17 +14,20 @@ class QueryContainer:
 
     def __init__(self, user: int, command: str) -> None:
         self.user = user
+        self.command = command
         self.destination_id: Optional[str] = None
         self.hotels = list()
         self.hotel_count: int = 0
         self.show_photo: bool = False
         self.photo_count: int = 0
-        self.language = 'en_US'
-        self.command = command
+        self.language: str = 'en_US'
+        self.checkin_date: Optional[datetime] = None
+        self.checkout_date: Optional[datetime] = None
 
     def __str__(self):
         return 'user={user}\ndestination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \
-                'show_photo={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n'.format(
+                'show_photo={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n' \
+               'check_in={check_in}\ncheck_out={check_out}\n'.format(
                     user=self.user,
                     destination_id=self.destination_id,
                     hotels=self.hotels,
@@ -31,7 +35,9 @@ class QueryContainer:
                     show_photo=self.show_photo,
                     photo_count=self.photo_count,
                     language=self.language,
-                    command=self.command
+                    command=self.command,
+                    check_in=self.checkin_date,
+                    check_out=self.checkout_date
                 )
 
 

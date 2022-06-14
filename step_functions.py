@@ -1,11 +1,13 @@
 import api
-from markup import destination_markup, yes_no_markup, link_markup
-from telebot.types import Message, InputMediaPhoto
-from bot import bot, queries
 import format
 import attributes
+
 from logs import error_log
 from CustomExceptions import ApiRequestError
+from markup import destination_markup, yes_no_markup, link_markup, calendar_days_markup
+
+from telebot.types import Message, InputMediaPhoto
+from bot import bot, queries
 from typing import Callable
 import functools
 from re import fullmatch
@@ -51,7 +53,7 @@ def track_exception(func: Callable) -> Callable:
 
 
 def print_start_message(message: Message) -> None:
-    bot.send_message(message.chat.id, 'Вы можете использовать следующие команды:\n\n '
+    bot.send_message(message.chat.id, 'Вы можете использовать следующие команды:\n\n'
                                       '/lowprice - топ самых дешёвых отелей в городе.\n'
                                       '/highprice - топ самых дорогих отелей в городе.\n'
                                       '/bestdeal - топ отелей, '
@@ -71,10 +73,7 @@ def print_destinations(message: Message) -> None:
 
     if destinations:
         markup = destination_markup(destinations)
-        bot.send_message(
-            message.chat.id, f'Выберите нужный вариант',
-            reply_markup=markup,
-            )
+        bot.send_message(message.chat.id, f'Выберите нужный вариант', reply_markup=markup)
     else:
         bot.send_message(message.chat.id, 'К сожалению, я ничего не нашел по Вашему запросу...')
         print_start_message(message)
