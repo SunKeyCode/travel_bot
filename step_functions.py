@@ -8,7 +8,7 @@ from markup import destination_markup, yes_no_markup, link_markup, calendar_days
 
 from datetime import date
 from telebot.types import Message, InputMediaPhoto
-from bot import bot, queries
+from bot import bot, queries, Steps, Commands
 from typing import Callable
 import functools
 from re import fullmatch
@@ -25,10 +25,10 @@ def define_lang(text: str) -> str:
         return 'en_US'
 
 
-def get_sort_order(command: str) -> str:
-    if command == 'lowprice':
+def get_sort_order(command: Commands) -> str:
+    if command == Commands.lowprice:
         return 'PRICE'
-    elif command == 'highprice':
+    elif command == Commands.highprice:
         return 'PRICE_HIGHEST_FIRST'
 
 
@@ -62,13 +62,14 @@ def print_start_message(message: Message) -> None:
                                       '/history - показать историю поиска отелей.')
 
 
-def next_step(message: Message, curr_step: str) -> None:
-    if curr_step == 'destination':
+def next_step(message: Message, curr_step: Steps) -> None:
+    """Определяем следующий шаг в зависимости от текущей команды"""
+    if curr_step == Steps.destination:
         get_date(message, 'Выберите дату заезда:')
-    if curr_step == 'checkin_date':
+    if curr_step == Steps.checkin_date:
         get_date(message, 'Выберите дату выезда:')
-    if curr_step == 'checkout_date':
-        if queries[message.chat.id].command in ('lowprice', 'highprice'):
+    if curr_step == Steps.checkout_date:
+        if queries[message.chat.id].command in (Commands.lowprice, Commands.highprice):
             bot.send_message(message.chat.id, text=f'Сколько отелей показать? Не больше {MAX_HOTELS}')
             bot.register_next_step_handler(message, show_photo)
 

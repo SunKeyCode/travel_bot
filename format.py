@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 import logs
 import re
 
@@ -22,8 +22,8 @@ def format_hotel(hotel: Dict) -> str:
             total_price = re.findall(r'\$\d+', hotel['ratePlan']['price'].get('fullyBundledPricePerStay', ''))[0]
             print(total_price)
             hotel_content.append('<b>Общая стоимость проживания: {}</b>'.format(total_price))
-        except Exception as exc:  # какая ошибка?
-            print('Ошибка получения реквизита totalPricePerStay')
+        except (IndexError, TypeError) as exc:
+            print('Ошибка получения реквизита fullyBundledPricePerStay')
             logs.error_log(exc, 'Отсутствует реквизит fullyBundledPricePerStay', f'{__name__}.{format_hotel.__name__}')
     except KeyError as exc:
         print('Ошибка поиска ключа:', exc)

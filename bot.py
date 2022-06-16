@@ -1,4 +1,5 @@
 import telebot
+import enum
 from datetime import date
 from typing import Optional, Dict
 
@@ -10,9 +11,24 @@ MAX_HOTELS = 10
 MAX_PHOTO = 10
 
 
+class Steps(enum.Enum):
+
+    destination = 'destination'
+    checkin_date = 'checkin_date'
+    checkout_date = 'checkout_date'
+
+
+class Commands(enum.Enum):
+
+    lowprice = 'lowprice'
+    highprice = 'highprice'
+    bestdeal = 'bestdeal'
+    history = 'history'
+
+
 class QueryContainer:
 
-    def __init__(self, user: int, command: str) -> None:
+    def __init__(self, user: int, command: Commands) -> None:
         self.user = user
         self.command = command
         self.destination_id: Optional[str] = None

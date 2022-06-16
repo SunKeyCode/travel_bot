@@ -1,8 +1,10 @@
 import requests
 import json
-from typing import Dict, List
+from typing import Dict, Callable
 from logs import error_log
 from CustomExceptions import ApiRequestError
+from functools import wraps
+from datetime import datetime
 
 
 headers = {
@@ -10,50 +12,55 @@ headers = {
     "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
     }
 
-# написать декоратор для отслеживания ошибок
+
+def track_api_exception(func: Callable) -> Callable:
+    """Декоратор для отслеживания ошибок, связанных с модулем requests"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
+            error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{func.__name__}')
+            print(f'{datetime.now()} Ошибка при работе с requests:', exc)
+            raise ApiRequestError
+    return wrapper
 
 
+@track_api_exception
 def get_photo(hotel_id: str) -> Dict:
     querystring = {"id": hotel_id}
-    try:
-        request = requests.get(
-                'https://hotels4.p.rapidapi.com/properties/get-hotel-photos',
-                headers=headers,
-                params=querystring,
-                timeout=20
-        )
-        request.raise_for_status()
 
-        data = json.loads(request.text)
-    except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{get_photo.__name__}')
-        print('Ошибка при работе с requests:', exc)
-        raise ApiRequestError
+    request = requests.get(
+            'https://hotels4.p.rapidapi.com/properties/get-hotel-photos',
+            headers=headers,
+            params=querystring,
+            timeout=20
+    )
+    request.raise_for_status()
+
+    data = json.loads(request.text)
 
     return data
 
 
+@track_api_exception
 def get_destinations(destination: str, language: str = 'en_US') -> Dict:
     querystring = {"query": destination, "locale": language, "currency": "USD"}
-    try:
-        request = requests.get(
-                'https://hotels4.p.rapidapi.com/locations/v2/search',
-                headers=headers,
-                params=querystring,
-                timeout=20
-        )
-        request.raise_for_status()
 
-        data = json.loads(request.text)
-    except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{get_destinations.__name__}')
-        print('Ошибка при работе с requests:', exc)
-        raise ApiRequestError('Ошибка в функции get_destinations')
+    request = requests.get(
+            'https://hotels4.p.rapidapi.com/locations/v2/search',
+            headers=headers,
+            params=querystring,
+            timeout=20
+    )
+    request.raise_for_status()
+
+    data = json.loads(request.text)
 
     return data
 
 
-# убрать checkin И checkout по дефолту
+@track_api_exception
 def hotels_by_destination(destination_id, check_in, check_out, language='en_US', sort_order='PRICE'):
     # querystring = {
     #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
@@ -64,20 +71,16 @@ def hotels_by_destination(destination_id, check_in, check_out, language='en_US',
         "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
     }
     print(querystring)
-    try:
-        request = requests.get(
-            'https://hotels4.p.rapidapi.com/properties/list',
-            headers=headers,
-            params=querystring,
-            timeout=20
-        )
-        request.raise_for_status()
 
-        data = json.loads(request.text)
-    except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-        error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{hotels_by_destination.__name__}')
-        print('Ошибка при работе с requests:', exc)
-        raise ApiRequestError
+    request = requests.get(
+        'https://hotels4.p.rapidapi.com/properties/list',
+        headers=headers,
+        params=querystring,
+        timeout=20
+    )
+    request.raise_for_status()
+
+    data = json.loads(request.text)
 
     return data
 
@@ -103,8 +106,3 @@ def hotels_by_destination(destination_id, check_in, check_out, language='en_US',
 #         data = json.load(file)
 #
 #     return data
-
-
-if __name__ == '__main__':
-    pass
-    # print(get_photo())

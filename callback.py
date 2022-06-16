@@ -1,27 +1,9 @@
 from telebot.types import Message, CallbackQuery
 
 import step_functions
-from bot import bot, queries, MAX_HOTELS, MAX_PHOTO
-from markup import change_month_callback, date_choice_callback, calendar_days_markup
-from datetime import datetime, date
-
-
-def date_parse(callback_data: str, mode='query') -> str:
-    callback_list = callback_data.split(':')
-    if mode == 'print':
-        res_string = '{day:02d}.{month:02d}.{year}'.format(
-            year=int(callback_list[1]),
-            month=int(callback_list[2]),
-            day=int(callback_list[3])
-        )
-    else:
-        res_string = '{year}-{month:02d}-{day:02d}'.format(
-            year=int(callback_list[1]),
-            month=int(callback_list[2]),
-            day=int(callback_list[3])
-        )
-
-    return res_string
+from bot import bot, queries, Steps, MAX_HOTELS, MAX_PHOTO
+from markup import change_month_callback, calendar_days_markup
+from datetime import date
 
 
 def callback_to_date(callback_data: str) -> date:
@@ -33,6 +15,7 @@ def callback_to_date(callback_data: str) -> date:
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'date_choice')
 def calendar_callback(call: CallbackQuery) -> None:
+    """Получение даты из календаря"""
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
@@ -42,7 +25,7 @@ def calendar_callback(call: CallbackQuery) -> None:
     if queries[call.message.chat.id].checkin_date is None:
         if callback_date >= date.today():
             queries[call.message.chat.id].checkin_date = callback_date
-            step_functions.next_step(call.message, 'checkin_date')
+            step_functions.next_step(call.message, Steps.checkin_date)
         else:
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
@@ -53,7 +36,7 @@ def calendar_callback(call: CallbackQuery) -> None:
     else:
         if callback_date > queries[call.message.chat.id].checkin_date:
             queries[call.message.chat.id].checkout_date = callback_date
-            step_functions.next_step(call.message, 'checkout_date')
+            step_functions.next_step(call.message, Steps.checkout_date)
         else:
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
@@ -65,9 +48,45 @@ def calendar_callback(call: CallbackQuery) -> None:
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'change_month')
 def change_month(call: CallbackQuery) -> None:
+    """Функция для выбора следующего/предыдущего месяца в календаре"""
     callback_data: dict = change_month_callback.parse(callback_data=call.data)
     year, month = int(callback_data['year']), int(callback_data['month'])
     bot.edit_message_reply_markup(
         call.message.chat.id, call.message.id,
         reply_markup=calendar_days_markup(year=year, month=month)
     )
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'destination')
+def destination_callback(call: CallbackQuery):
+    """Получение destination"""
+    bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.id,
+        text=f'Выберите даты заезда и выезда:'
+    )
+    queries[call.message.chat.id].destination_id = call.data.split(':')[1]
+    step_functions.next_step(call.message, Steps.destination)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'photo')
+def photo_callback(call: CallbackQuery):
+    """Показывать фотографии или нет"""
+    bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+    if call.data.split(':')[1] == 'yes':
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.id,
+            text=f'Сколько фотографий показать? Не больше {MAX_PHOTO}'
+        )
+        queries[call.message.chat.id].show_photo = True
+        queries[call.message.chat.id].photo_count = call.data.split(':')[1]
+        step_functions.print_hotels(message=call.message, no_photo=False)
+    elif call.data.split(':')[1] == 'no':
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.id,
+            text=f'Вот отели, которые я нашел:'
+        )
+        step_functions.print_hotels(message=call.message, no_photo=True)

@@ -1,11 +1,9 @@
-import time
-from datetime import date
 import lowprice
 import highprice
 from telebot.types import Message
+from time import sleep
 from bot import bot
 from logs import error_log
-from markup import calendar_days_markup
 import callback
 
 
@@ -48,12 +46,6 @@ def high_price_command(message: Message) -> None:
     highprice.first_step(message)
 
 
-@bot.message_handler(commands=['cal'])
-def high_price_command(message: Message) -> None:
-    now = date.today()
-    bot.send_message(message.chat.id, 'Тест календаря', reply_markup=calendar_days_markup(now.year, now.month))
-
-
 @bot.message_handler(content_types='text')
 def other_text(message: Message) -> None:
     bot.send_message(message.chat.id, 'Такая команда мне не понятна...')
@@ -67,4 +59,4 @@ while True:
         print('Возникло непредвиденное исключение в модуле main:', exc)
         error_log(exc, 'Непредвиденное исключение в модуле main')
         bot.stop_polling()
-        time.sleep(2)
+        sleep(2)
