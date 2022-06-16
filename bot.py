@@ -1,5 +1,5 @@
 import telebot
-from datetime import datetime
+from datetime import date
 from typing import Optional, Dict
 
 
@@ -21,8 +21,8 @@ class QueryContainer:
         self.show_photo: bool = False
         self.photo_count: int = 0
         self.language: str = 'en_US'
-        self.checkin_date: Optional[datetime] = None
-        self.checkout_date: Optional[datetime] = None
+        self.checkin_date: Optional[date] = None
+        self.checkout_date: Optional[date] = None
 
     def __str__(self):
         return 'user={user}\ndestination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \

@@ -53,14 +53,15 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
     return data
 
 
-def hotels_by_destination(destination_id, language='en_US', sort_order='PRICE'):
+# убрать checkin И checkout по дефолту
+def hotels_by_destination(destination_id, check_in, check_out, language='en_US', sort_order='PRICE'):
     # querystring = {
     #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
     #     "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
     # }
     querystring = {
-        "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
-        "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
+        "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
+        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
     }
     print(querystring)
     try:

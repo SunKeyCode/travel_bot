@@ -13,13 +13,19 @@ def first_step(message: Message):
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'destination')
 def destination_callback(call: CallbackQuery):
     bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+    # bot.edit_message_text(
+    #     chat_id=call.message.chat.id,
+    #     message_id=call.message.id,
+    #     text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
+    # )
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
-        text=f'Сколько отелей показать? Не больше {MAX_HOTELS}'
+        text=f'Выберите даты заезда и выезда:'
     )
     queries[call.message.chat.id].destination_id = call.data.split(':')[1]
-    bot.register_next_step_handler(call.message, step_functions.show_photo)
+    step_functions.next_step(call.message, 'destination')
+    # bot.register_next_step_handler(call.message, step_functions.show_photo)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'photo')

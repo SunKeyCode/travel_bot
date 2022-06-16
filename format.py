@@ -1,5 +1,6 @@
 from typing import List, Dict
 import logs
+import re
 
 
 def format_hotel(hotel: Dict) -> str:
@@ -16,7 +17,14 @@ def format_hotel(hotel: Dict) -> str:
             )
         )
         hotel_content.append('<b>Расстояние от центра</b>: {}'.format(hotel['landmarks'][0]['distance']))
-        hotel_content.append('<b>Цена</b>: {}'.format(hotel['ratePlan']['price']['current']))
+        hotel_content.append('<b>Цена за сутки</b>: {}'.format(hotel['ratePlan']['price']['current']))
+        try:
+            total_price = re.findall(r'\$\d+', hotel['ratePlan']['price'].get('fullyBundledPricePerStay', ''))[0]
+            print(total_price)
+            hotel_content.append('<b>Общая стоимость проживания: {}</b>'.format(total_price))
+        except Exception as exc:  # какая ошибка?
+            print('Ошибка получения реквизита totalPricePerStay')
+            logs.error_log(exc, 'Отсутствует реквизит fullyBundledPricePerStay', f'{__name__}.{format_hotel.__name__}')
     except KeyError as exc:
         print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, f'Ошибка ключа в {hotel}', f'{__name__}.{format_hotel.__name__}')

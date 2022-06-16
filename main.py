@@ -64,7 +64,7 @@ while True:
         bot.polling(none_stop=True, interval=0)
         break
     except Exception as exc:
-        print('Возникло непредвиденное исключение:', exc)
-        error_log(exc, 'Непредвиденное исключение')
+        print('Возникло непредвиденное исключение в модуле main:', exc)
+        error_log(exc, 'Непредвиденное исключение в модуле main')
         bot.stop_polling()
         time.sleep(2)

@@ -5,10 +5,11 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.callback_data import CallbackData, CallbackDataFilter
 
 
-city_callback = CallbackData('destination_id', prefix='destination')
+destination_callback = CallbackData('destination_id', prefix='destination')
 photo_callback = CallbackData('answer', prefix='photo')
 command_callback = CallbackData('command_name', prefix='command')
 date_choice_callback = CallbackData('year', 'month', 'day', prefix='date_choice')
+change_month_callback = CallbackData('year', 'month', prefix='change_month')
 
 EMTPY_FIELD = '1'
 # написать для всех систем!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -32,7 +33,7 @@ def destination_markup(destinations):
     for item in destinations:
         markup.add(InlineKeyboardButton(
             f'{item["caption"]}',
-            callback_data=city_callback.new(destination_id=item['destinationId']))
+            callback_data=destination_callback.new(destination_id=item['destinationId']))
         )
 
     return markup
@@ -80,19 +81,15 @@ def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
     previous_date = date(year=year, month=month, day=1) - timedelta(days=1)
     next_date = date(year=year, month=month, day=1) + timedelta(days=31)
 
-    # keyboard.add(
-    #     InlineKeyboardButton(
-    #         text='Previous month',
-    #         callback_data=calendar_factory.new(year=previous_date.year, month=previous_date.month)
-    #     ),
-    #     InlineKeyboardButton(
-    #         text='Zoom out',
-    #         callback_data=calendar_zoom.new(year=year)
-    #     ),
-    #     InlineKeyboardButton(
-    #         text='Next month',
-    #         callback_data=calendar_factory.new(year=next_date.year, month=next_date.month)
-    #     ),
-    # )
+    keyboard.add(
+        InlineKeyboardButton(
+            text='предыдущий месяц',
+            callback_data=change_month_callback.new(year=previous_date.year, month=previous_date.month)
+        ),
+        InlineKeyboardButton(
+            text='следующий месяц',
+            callback_data=change_month_callback.new(year=next_date.year, month=next_date.month)
+        )
+    )
 
     return keyboard

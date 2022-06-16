@@ -6,6 +6,7 @@ from logs import error_log
 from CustomExceptions import ApiRequestError
 from markup import destination_markup, yes_no_markup, link_markup, calendar_days_markup
 
+from datetime import date
 from telebot.types import Message, InputMediaPhoto
 from bot import bot, queries
 from typing import Callable
@@ -61,6 +62,17 @@ def print_start_message(message: Message) -> None:
                                       '/history - показать историю поиска отелей.')
 
 
+def next_step(message: Message, curr_step: str) -> None:
+    if curr_step == 'destination':
+        get_date(message, 'Выберите дату заезда:')
+    if curr_step == 'checkin_date':
+        get_date(message, 'Выберите дату выезда:')
+    if curr_step == 'checkout_date':
+        if queries[message.chat.id].command in ('lowprice', 'highprice'):
+            bot.send_message(message.chat.id, text=f'Сколько отелей показать? Не больше {MAX_HOTELS}')
+            bot.register_next_step_handler(message, show_photo)
+
+
 @track_exception
 def print_destinations(message: Message) -> None:
 
@@ -77,6 +89,11 @@ def print_destinations(message: Message) -> None:
     else:
         bot.send_message(message.chat.id, 'К сожалению, я ничего не нашел по Вашему запросу...')
         print_start_message(message)
+
+
+def get_date(message: Message, text: str):
+    now = date.today()
+    bot.send_message(message.chat.id, text, reply_markup=calendar_days_markup(now.year, now.month))
 
 
 def show_photo(message):
@@ -98,21 +115,20 @@ def show_photo(message):
 @track_exception
 def print_hotels(message: Message, no_photo=True):
     if no_photo:
-
         hotels = attributes.hotels(
             api.hotels_by_destination(
                 destination_id=queries[message.chat.id].destination_id,
+                check_in=queries[message.chat.id].checkin_date.strftime('%Y-%m-%d'),
+                check_out=queries[message.chat.id].checkout_date.strftime('%Y-%m-%d'),
                 language=queries[message.chat.id].language,
                 sort_order=get_sort_order(queries[message.chat.id].command)
             ),
             limit=queries[message.chat.id].hotel_count
         )
-
         for i_hotel in hotels:
             url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
             markup = link_markup('Перейти на страницу отеля ->', url)
             bot.send_message(message.chat.id, format.format_hotel(i_hotel), parse_mode='HTML', reply_markup=markup)
-        print(queries[message.chat.id])
         print_start_message(message)
     else:
         bot.register_next_step_handler(message, _print_hotels)
@@ -120,6 +136,7 @@ def print_hotels(message: Message, no_photo=True):
 
 @track_exception
 def _print_hotels(message: Message) -> None:
+    """Печатает отели с фотографиями"""
     if not message.text.isdigit():
         bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
         bot.register_next_step_handler(message, _print_hotels)
@@ -132,6 +149,8 @@ def _print_hotels(message: Message) -> None:
     hotels = attributes.hotels(
         api.hotels_by_destination(
             destination_id=queries[message.chat.id].destination_id,
+            check_in=queries[message.chat.id].checkin_date.strftime('%Y-%m-%d'),
+            check_out=queries[message.chat.id].checkout_date.strftime('%Y-%m-%d'),
             language=queries[message.chat.id].language,
             sort_order=get_sort_order(queries[message.chat.id].command)
         ),
