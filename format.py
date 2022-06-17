@@ -19,8 +19,10 @@ def format_hotel(hotel: Dict) -> str:
         hotel_content.append('<b>Расстояние от центра</b>: {}'.format(hotel['landmarks'][0]['distance']))
         hotel_content.append('<b>Цена за сутки</b>: {}'.format(hotel['ratePlan']['price']['current']))
         try:
-            total_price = re.findall(r'\$\d+', hotel['ratePlan']['price'].get('fullyBundledPricePerStay', ''))[0]
-            print(total_price)
+            total_price = re.findall(
+                r'\$\d+[,]?\d+',
+                hotel['ratePlan']['price'].get('fullyBundledPricePerStay', '')
+            )[0]
             hotel_content.append('<b>Общая стоимость проживания: {}</b>'.format(total_price))
         except (IndexError, TypeError) as exc:
             print('Ошибка получения реквизита fullyBundledPricePerStay')
