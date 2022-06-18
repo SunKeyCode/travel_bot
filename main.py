@@ -2,8 +2,9 @@ import lowprice
 import highprice
 from telebot.types import Message
 from time import sleep
-from bot import bot
+from bot import bot, Commands
 from logs import error_log
+from step_functions import first_step
 import callback
 
 
@@ -44,6 +45,11 @@ def low_price_command(message: Message) -> None:
 @bot.message_handler(commands=['highprice'])
 def high_price_command(message: Message) -> None:
     highprice.first_step(message)
+
+
+@bot.message_handler(commands=['bestdeal'])
+def best_deal_command(message: Message) -> None:
+    first_step(message, Commands.bestdeal)
 
 
 @bot.message_handler(content_types='text')

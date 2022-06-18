@@ -12,7 +12,7 @@ date_choice_callback = CallbackData('year', 'month', 'day', prefix='date_choice'
 change_month_callback = CallbackData('year', 'month', prefix='change_month')
 
 EMTPY_FIELD = '1'
-# написать для всех систем!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# написать для всех ОС!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 """for windows"""
 locale.setlocale(locale.LC_TIME, ('Russian_Russia', '1251'))
 

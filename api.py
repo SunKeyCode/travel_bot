@@ -43,21 +43,21 @@ def get_photo(hotel_id: str) -> Dict:
     return data
 
 
-@track_api_exception
-def get_destinations(destination: str, language: str = 'en_US') -> Dict:
-    querystring = {"query": destination, "locale": language, "currency": "USD"}
-
-    request = requests.get(
-            'https://hotels4.p.rapidapi.com/locations/v2/search',
-            headers=headers,
-            params=querystring,
-            timeout=20
-    )
-    request.raise_for_status()
-
-    data = json.loads(request.text)
-
-    return data
+# @track_api_exception
+# def get_destinations(destination: str, language: str = 'en_US') -> Dict:
+#     querystring = {"query": destination, "locale": language, "currency": "USD"}
+#
+#     request = requests.get(
+#             'https://hotels4.p.rapidapi.com/locations/v2/search',
+#             headers=headers,
+#             params=querystring,
+#             timeout=20
+#     )
+#     request.raise_for_status()
+#
+#     data = json.loads(request.text)
+#
+#     return data
 
 
 @track_api_exception
@@ -94,10 +94,10 @@ def hotels_by_destination(destination_id, check_in, check_out, language='en_US',
 
 
 # для тестов
-# def get_destinations():
-#     with open('result.json', 'r') as file:
-#         data = json.load(file)
-#     return data
+def get_destinations(destination: str, language: str = 'en_US'):
+    with open('result.json', 'r') as file:
+        data = json.load(file)
+    return data
 
 
 # для тестов

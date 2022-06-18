@@ -8,8 +8,8 @@ from markup import destination_markup, yes_no_markup, link_markup, calendar_days
 
 from datetime import date
 from telebot.types import Message, InputMediaPhoto
-from bot import bot, queries, Steps, Commands
-from typing import Callable
+from bot import bot, queries, QueryContainer, Steps, Commands
+from typing import Callable, Dict
 import functools
 from re import fullmatch
 
@@ -62,6 +62,13 @@ def print_start_message(message: Message) -> None:
                                       '/history - показать историю поиска отелей.')
 
 
+def first_step(message: Message, command: Commands) -> None:
+    """Первый шаг для всех команд, кроме команды history"""
+    bot.send_message(message.chat.id, 'Введите название города для поиска:')
+    queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(user=message.chat.id, command=command)
+    bot.register_next_step_handler(message, print_destinations)
+
+
 def next_step(message: Message, curr_step: Steps) -> None:
     """Определяем следующий шаг в зависимости от текущей команды"""
     if curr_step == Steps.destination:
@@ -72,6 +79,9 @@ def next_step(message: Message, curr_step: Steps) -> None:
         if queries[message.chat.id].command in (Commands.lowprice, Commands.highprice):
             bot.send_message(message.chat.id, text=f'Сколько отелей показать? Не больше {MAX_HOTELS}')
             bot.register_next_step_handler(message, show_photo)
+        elif queries[message.chat.id].command == Commands.bestdeal:
+            bot.send_message(message.chat.id, 'Введите диапазон цен через пробел, например:\n50 100')
+            bot.register_next_step_handler(message, get_price_range)
 
 
 @track_exception
@@ -95,6 +105,24 @@ def print_destinations(message: Message) -> None:
 def get_date(message: Message, text: str):
     now = date.today()
     bot.send_message(message.chat.id, text, reply_markup=calendar_days_markup(now.year, now.month))
+
+
+def get_price_range(message: Message) -> None:
+
+    try:
+        prices = list(map(int, message.text.split()))
+
+        if len(prices) != 2:
+            raise ValueError
+        for value in prices:
+            if int(value) < 0:
+                raise ValueError
+        queries[message.chat.id].min_price = min(prices)
+        queries[message.chat.id].max_price = max(prices)
+    except (TypeError, ValueError):
+        bot.send_message(message.chat.id, 'Вы неправильно ввели диапазон... Попробуйте еще раз!')
+        next_step(message, Steps.checkout_date)
+    print(queries[message.chat.id])
 
 
 def show_photo(message):
