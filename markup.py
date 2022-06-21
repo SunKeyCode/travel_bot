@@ -2,7 +2,8 @@ import calendar
 import locale
 from datetime import date, timedelta
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from telebot.callback_data import CallbackData, CallbackDataFilter
+from telebot.callback_data import CallbackData
+from sys import platform
 
 
 destination_callback = CallbackData('destination_id', prefix='destination')
@@ -12,9 +13,11 @@ date_choice_callback = CallbackData('year', 'month', 'day', prefix='date_choice'
 change_month_callback = CallbackData('year', 'month', prefix='change_month')
 
 EMTPY_FIELD = '1'
-# написать для всех ОС!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-"""for windows"""
-locale.setlocale(locale.LC_TIME, ('Russian_Russia', '1251'))
+
+if platform == 'win32':
+    locale.setlocale(locale.LC_TIME, ('Russian_Russia', '1251'))
+elif platform == 'darwin':
+    locale.setlocale(locale.LC_TIME, ('ru_RU', 'UTF-8'))
 
 WEEK_DAYS = [calendar.day_abbr[i] for i in range(7)]
 MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
@@ -22,8 +25,8 @@ MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
 def yes_no_markup() -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton('Да', callback_data=photo_callback.new(answer='yes')))
-    markup.add(InlineKeyboardButton('Нет', callback_data=photo_callback.new(answer='no')))
+    markup.add(InlineKeyboardButton('✅ Да', callback_data=photo_callback.new(answer='yes')))
+    markup.add(InlineKeyboardButton('❎ Нет', callback_data=photo_callback.new(answer='no')))
 
     return markup
 
@@ -83,11 +86,11 @@ def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
 
     keyboard.add(
         InlineKeyboardButton(
-            text='предыдущий месяц',
+            text='⬅ предыдущий месяц',
             callback_data=change_month_callback.new(year=previous_date.year, month=previous_date.month)
         ),
         InlineKeyboardButton(
-            text='следующий месяц',
+            text='следующий месяц ➡',
             callback_data=change_month_callback.new(year=next_date.year, month=next_date.month)
         )
     )

@@ -1,6 +1,6 @@
 import requests
 import json
-from typing import Dict, Callable
+from typing import Dict, Tuple, Callable, Optional
 from logs import error_log
 from CustomExceptions import ApiRequestError
 from functools import wraps
@@ -61,7 +61,9 @@ def get_photo(hotel_id: str) -> Dict:
 
 
 @track_api_exception
-def hotels_by_destination(destination_id, check_in, check_out, language='en_US', sort_order='PRICE'):
+def hotels_by_destination(
+        destination_id: str, check_in: str, check_out: str, language: str = 'en_US',
+        sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None) -> Dict:
     # querystring = {
     #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
     #     "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
@@ -70,6 +72,9 @@ def hotels_by_destination(destination_id, check_in, check_out, language='en_US',
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
         "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
     }
+    if price_range is not None:
+        querystring['priceMin'] = price_range[0]
+        querystring['priceMax'] = price_range[1]
     print(querystring)
 
     request = requests.get(

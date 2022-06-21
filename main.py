@@ -27,7 +27,7 @@ def start_command(message: Message) -> None:
 
 @bot.message_handler(commands=['help'])
 def help_command(message: Message) -> None:
-    bot.send_message(message.chat.id, 'Вы можете использовать следующие команды:\n\n'
+    bot.send_message(message.chat.id, 'ℹ Вы можете использовать следующие команды:\n\n'
                                       '/lowprice - топ самых дешёвых отелей в городе.\n'
                                       '/highprice - топ самых дорогих отелей в городе.\n'
                                       '/bestdeal - топ отелей, '

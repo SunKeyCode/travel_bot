@@ -42,6 +42,19 @@ def destinations(request_data: Dict) -> List[Dict]:
         raise KeyError(f'Ошибка ключа в функции {destinations.__name__}')
 
 
+def destinations_dict(request_data: Dict) -> Dict[str, str]:
+    result = dict()
+    try:
+        for elem in request_data['suggestions'][0]['entities']:
+            result[elem['destinationId']] = re.sub(r'<[/]?span.*?>', '', elem['caption'])
+    except KeyError as exc:
+        print('Ошибка поиска ключа в функции destinations_dict:', exc)
+        logs.error_log(exc, 'Ошибка ключа', destinations.__name__)
+        raise KeyError(f'Ошибка ключа в функции {destinations.__name__}')
+
+    return result
+
+
 def get_hotel_id(hotel: Dict) -> str:
     try:
         return hotel['id']

@@ -19,7 +19,7 @@ def calendar_callback(call: CallbackQuery) -> None:
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
-        text=callback_to_date(call.data).strftime('%d.%m.%Y')
+        text='✅ ' + callback_to_date(call.data).strftime('%d.%m.%Y')
     )
     callback_date = callback_to_date(call.data)
     if queries[call.message.chat.id].checkin_date is None:
@@ -30,9 +30,9 @@ def calendar_callback(call: CallbackQuery) -> None:
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
                 message_id=call.message.id,
-                text='Дата заезда не должна быть меньше текущей даты! Попробуем еще раз:'
+                text='❌ Дата заезда не должна быть меньше текущей даты! Попробуем еще раз:'
             )
-            step_functions.get_date(call.message, 'Выберите дату заезда:')
+            step_functions.get_date(call.message, 'Выберите дату заезда 📅:')
     else:
         if callback_date > queries[call.message.chat.id].checkin_date:
             queries[call.message.chat.id].checkout_date = callback_date
@@ -41,9 +41,9 @@ def calendar_callback(call: CallbackQuery) -> None:
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
                 message_id=call.message.id,
-                text='Дата выезда должна быть больше даты заезда! Попробуем еще раз:'
+                text='❌ Дата выезда должна быть больше даты заезда! Попробуем еще раз:'
             )
-            step_functions.get_date(call.message, 'Выберите дату выезда:')
+            step_functions.get_date(call.message, 'Выберите дату выезда 📅:')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'change_month')
@@ -61,12 +61,14 @@ def change_month(call: CallbackQuery) -> None:
 def destination_callback(call: CallbackQuery):
     """Получение destination"""
     bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+    destination_id = call.data.split(':')[1]
+    # bot.send_message(call.message.chat.id, '✅ ' + queries[call.message.chat.id].destinations[destination_id])
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
-        text=f'Выберите даты заезда и выезда:'
+        text='✅ ' + queries[call.message.chat.id].destinations[destination_id]
     )
-    queries[call.message.chat.id].destination_id = call.data.split(':')[1]
+    queries[call.message.chat.id].destination_id = destination_id
     step_functions.next_step(call.message, Steps.destination)
 
 
@@ -87,6 +89,6 @@ def photo_callback(call: CallbackQuery):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.id,
-            text=f'Вот отели, которые я нашел:'
+            text=f'Ищем отели... ⌛'
         )
         step_functions.print_hotels(message=call.message, no_photo=True)
