@@ -3,14 +3,20 @@ import re
 import logs
 
 
-def hotels(data: Dict, limit: Optional[int] = None) -> List[dict]:
+def distance_from_str(distance_str: str) -> float:
+    return float(distance_str.split()[0])
+
+
+def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[dict]:
     try:
-        if limit is None:
-            return data['data']['body']['searchResults']['results']
+        if max_distance is not None:
+            items = data['data']['body']['searchResults']['results']
+            result_data = filter(lambda item: distance_from_str(item['landmarks'][0]['distance']) <= max_distance, items)
+            return list(result_data)[:limit]
         else:
             return data['data']['body']['searchResults']['results'][:limit]
     except KeyError as exc:
-        print(exc)
+        print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, 'Ошибка ключа', hotels.__name__)
         raise KeyError(f'Ошибка ключа в функции {hotels.__name__}')
 
