@@ -32,6 +32,7 @@ def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[di
     if max_distance is not None:
         items = data['data']['body']['searchResults']['results']
         result_data = filter(lambda item: distance_from_str(item['landmarks'][0]['distance']) <= max_distance, items)
+        result_data = sorted(result_data, key=lambda elem: elem['ratePlan']['price']['exactCurrent'])
         return list(result_data)[:limit]
     else:
         return data['data']['body']['searchResults']['results'][:limit]

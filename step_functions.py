@@ -73,6 +73,16 @@ def first_step(message: Message, command: Commands) -> None:
 
 def next_step(message: Message, curr_step: Steps) -> None:
     """Определяем следующий шаг в зависимости от текущей команды"""
+    if queries[message.chat.id].currency == 'USD':
+        currency = 'долларах'
+        price_range = '50 100'
+    elif queries[message.chat.id].currency == 'RUB':
+        currency = 'рублях'
+        price_range = '1000 5000'
+    else:
+        currency = 'долларах'
+        price_range = '50 100'
+
     if curr_step == Steps.destination:
         get_date(message, 'Выберите дату заезда 📅:')
     elif curr_step == Steps.checkin_date:
@@ -82,7 +92,11 @@ def next_step(message: Message, curr_step: Steps) -> None:
             bot.send_message(message.chat.id, text=f'Сколько отелей показать? Не больше {MAX_HOTELS}')
             bot.register_next_step_handler(message, show_photo)
         elif queries[message.chat.id].command == Commands.bestdeal:
-            bot.send_message(message.chat.id, 'Введите диапазон цен через пробел ↔ \nпример: 50 100')
+            bot.send_message(
+                message.chat.id,
+                f'Введите диапазон цен (в {currency}) через пробел, \n<b>пример</b>: {price_range}',
+                parse_mode='HTML'
+            )
             bot.register_next_step_handler(message, get_price_range)
 
 
@@ -163,61 +177,24 @@ def show_photo(message):
 
 
 @track_exception
-def print_hotels(message: Message, no_photo: bool = True) -> None:
-    if queries[message.chat.id].min_price is None or queries[message.chat.id].max_price is None:
-        price_range = None
-    else:
-        price_range = (queries[message.chat.id].min_price, queries[message.chat.id].max_price)
-    if no_photo:
-        hotels = attributes.hotels(
-            api.hotels_by_destination(
-                destination_id=queries[message.chat.id].destination_id,
-                check_in=queries[message.chat.id].checkin_date.strftime('%Y-%m-%d'),
-                check_out=queries[message.chat.id].checkout_date.strftime('%Y-%m-%d'),
-                language=queries[message.chat.id].language,
-                # language='en_US',
-                sort_order=get_sort_order(queries[message.chat.id].command),
-                price_range=price_range
-            ),
-            limit=queries[message.chat.id].hotel_count,
-            max_distance=queries[message.chat.id].max_distance
-        )
-        if not hotels:
-            bot.send_message(message.chat.id, '😞 По Вашему запросу не найдено ни одного отеля... Попробуйте '
-                                              'изменить параметры поиска (например расширить диапазон цен).')
-            print_start_message(message)
+def print_hotels(message: Message) -> None:
+
+    if queries[message.chat.id].show_photo:
+        if not message.text.isdigit():
+            bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
+            bot.register_next_step_handler(message, print_hotels)
             return
-        date_delta = queries[message.chat.id].checkout_date - queries[message.chat.id].checkin_date
-        for i_hotel in hotels:
-            url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
-            markup = link_markup('Перейти на страницу отеля 🔗', url)
-            bot.send_message(
-                message.chat.id, format.format_hotel(i_hotel, date_delta.days),
-                parse_mode='HTML', reply_markup=markup
-            )
-        print_start_message(message)
-    else:
-        bot.register_next_step_handler(message, _print_hotels)
-
-
-@track_exception
-def _print_hotels(message: Message) -> None:
-    """Печатает отели с фотографиями"""
-    if not message.text.isdigit():
-        bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
-        bot.register_next_step_handler(message, _print_hotels)
-        return
-    elif (int(message.text) < 1) or (int(message.text) > MAX_HOTELS):
-        bot.send_message(message.chat.id, f'Количество должно быть от 1 до {MAX_PHOTO}')
-        bot.register_next_step_handler(message, _print_hotels)
-        return
+        elif (int(message.text) < 1) or (int(message.text) > MAX_HOTELS):
+            bot.send_message(message.chat.id, f'Количество должно быть от 1 до {MAX_PHOTO}')
+            bot.register_next_step_handler(message, print_hotels)
+            return
+        bot.send_message(message.chat.id, 'Ищем отели... ⌛')
+        queries[message.chat.id].photo_count = int(message.text)
 
     if queries[message.chat.id].min_price is None or queries[message.chat.id].max_price is None:
         price_range = None
     else:
         price_range = (queries[message.chat.id].min_price, queries[message.chat.id].max_price)
-
-    bot.send_message(message.chat.id, 'Ищем отели... ⌛')
 
     hotels = attributes.hotels(
         api.hotels_by_destination(
@@ -225,34 +202,43 @@ def _print_hotels(message: Message) -> None:
             check_in=queries[message.chat.id].checkin_date.strftime('%Y-%m-%d'),
             check_out=queries[message.chat.id].checkout_date.strftime('%Y-%m-%d'),
             language=queries[message.chat.id].language,
+            # language='en_US',
             sort_order=get_sort_order(queries[message.chat.id].command),
             price_range=price_range
         ),
         limit=queries[message.chat.id].hotel_count,
         max_distance=queries[message.chat.id].max_distance
     )
-
     if not hotels:
         bot.send_message(message.chat.id, '😞 По Вашему запросу не найдено ни одного отеля... Попробуйте '
                                           'изменить параметры поиска (например расширить диапазон цен).')
         print_start_message(message)
         return
 
-    queries[message.chat.id].photo_count = int(message.text)
     date_delta = queries[message.chat.id].checkout_date - queries[message.chat.id].checkin_date
-    for i_hotel in hotels:
-        hotel_id = attributes.get_hotel_id(i_hotel)
-        photo_data = api.get_photo(hotel_id)
+    currency = queries[message.chat.id].currency
 
-        media = list()
-        for photo in attributes.photo(data=photo_data, limit=queries[message.chat.id].photo_count):
-            media.append(InputMediaPhoto(format.format_photo(photo, 'z'), i_hotel['name']))
-        url = f'https://www.hotels.com/ho{hotel_id}'
-        markup = link_markup('Перейти на страницу отеля 🔗', url)
-        bot.send_media_group(message.chat.id, media)
-        bot.send_message(
-            message.chat.id, format.format_hotel(i_hotel, date_delta.days),
-            parse_mode='HTML', reply_markup=markup
-        )
+    if queries[message.chat.id].show_photo:
+        for i_hotel in hotels:
+            hotel_id = attributes.get_hotel_id(i_hotel)
+            photo_data = api.get_photo(hotel_id)
 
+            media = list()
+            for photo in attributes.photo(data=photo_data, limit=queries[message.chat.id].photo_count):
+                media.append(InputMediaPhoto(format.format_photo(photo, 'z'), i_hotel['name']))
+            url = f'https://www.hotels.com/ho{hotel_id}'
+            markup = link_markup('Перейти на страницу отеля 🔗', url)
+            bot.send_media_group(message.chat.id, media)
+            bot.send_message(
+                message.chat.id, format.format_hotel(i_hotel, date_delta.days, currency),
+                parse_mode='HTML', reply_markup=markup
+            )
+    else:
+        for i_hotel in hotels:
+            url = f'https://www.hotels.com/ho{attributes.get_hotel_id(i_hotel)}'
+            markup = link_markup('Перейти на страницу отеля 🔗', url)
+            bot.send_message(
+                message.chat.id, format.format_hotel(i_hotel, date_delta.days, currency),
+                parse_mode='HTML', reply_markup=markup
+            )
     print_start_message(message)

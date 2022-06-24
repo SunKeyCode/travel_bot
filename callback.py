@@ -84,11 +84,12 @@ def photo_callback(call: CallbackQuery):
         )
         queries[call.message.chat.id].show_photo = True
         queries[call.message.chat.id].photo_count = call.data.split(':')[1]
-        step_functions.print_hotels(message=call.message, no_photo=False)
+        bot.register_next_step_handler(call.message, step_functions.print_hotels)
+        # step_functions.print_hotels(message=call.message, no_photo=False)
     elif call.data.split(':')[1] == 'no':
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.id,
             text=f'Ищем отели... ⌛'
         )
-        step_functions.print_hotels(message=call.message, no_photo=True)
+        step_functions.print_hotels(message=call.message)

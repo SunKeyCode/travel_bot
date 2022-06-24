@@ -68,10 +68,6 @@ def hotels_by_destination(
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
         "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
     }
-    # querystring = {
-    #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
-    #     "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
-    # }
     if price_range is not None:
         querystring['priceMin'] = str(price_range[0])
         querystring['priceMax'] = str(price_range[1])

@@ -3,38 +3,6 @@ import logs
 import re
 
 
-def _format_hotel(hotel: Dict, date_delta: int) -> str:
-    hotel_content = list()
-    try:
-        # сделать везде get
-        hotel_content.append('<b>Название</b>: {}'.format(hotel['name']))
-        hotel_content.append('<b>Адрес</b>: {}, {}, {}, {}, {}'.format(
-            hotel['address'].get('postalCode', ''),
-            hotel['address']['countryName'],
-            hotel['address']['region'],
-            hotel['address']['locality'],
-            hotel['address'].get('streetAddress', '')
-            ).ljust(80, '  ')
-        )
-        hotel_content.append('<b>Расстояние от центра</b>: {}'.format(hotel['landmarks'][0]['distance']))
-        hotel_content.append('<b>Цена за сутки</b>: {}'.format(hotel['ratePlan']['price']['current']))
-        try:
-            total_price = re.findall(
-                r'\$\d+[,]?\d+',
-                hotel['ratePlan']['price'].get('fullyBundledPricePerStay', '')
-            )[0]
-        except (IndexError, TypeError) as exc:
-            total_price = round(date_delta * round(float(hotel['ratePlan']['price']['exactCurrent'])))
-            # обработать TypeError если преобразование во float вызовет исключение
-        hotel_content.append('<b>Общая стоимость проживания:</b> {}'.format(total_price))
-    except KeyError as exc:
-        print('Ошибка поиска ключа:', exc)
-        logs.error_log(exc, f'Ошибка ключа в {hotel}', f'{__name__}.{format_hotel.__name__}')
-        raise KeyError(f'Ошибка ключа, функция: {__name__}.{format_hotel.__name__}')
-
-    return '\n'.join(hotel_content)
-
-
 def format_price(price: Union[int, str]) -> str:
     if not isinstance(price, str):
         price = '{price:,d}'.format(price=price)
@@ -44,7 +12,11 @@ def format_price(price: Union[int, str]) -> str:
     return price
 
 
-def format_hotel(hotel: Dict, date_delta: int) -> str:
+def format_hotel(hotel: Dict, date_delta: int, currency: str) -> str:
+    if currency == 'USD':
+        currency = '$'
+    elif currency == 'RUB':
+        currency = 'руб.'
 
     name = hotel['name']
     address = list()
@@ -76,8 +48,8 @@ def format_hotel(hotel: Dict, date_delta: int) -> str:
     hotel_content.append(f'▫<b>Название отеля:</b> {name}')
     hotel_content.append(f'▫<b>Адрес отеля:</b> {address}')
     hotel_content.append(f'▫<b>Расстояние от центра:</b> {distance}')
-    hotel_content.append(f'▫<b>Цена за сутки:</b> {format_price(price)}')
-    hotel_content.append(f'▫<b>Общая стоимость:</b> {format_price(total_price)}')
+    hotel_content.append(f'▫<b>Цена за сутки:</b> {format_price(price)} {currency}')
+    hotel_content.append(f'▫<b>Общая стоимость:</b> {format_price(total_price)} {currency}')
 
     return '\n'.join(hotel_content)
 
