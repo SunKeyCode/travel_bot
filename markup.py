@@ -26,7 +26,7 @@ MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
 def yes_no_markup() -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton('✅ Да', callback_data=photo_callback.new(answer='yes')))
-    markup.add(InlineKeyboardButton('❎ Нет', callback_data=photo_callback.new(answer='no')))
+    markup.add(InlineKeyboardButton('❌ Нет', callback_data=photo_callback.new(answer='no')))
 
     return markup
 

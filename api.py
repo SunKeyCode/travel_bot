@@ -43,38 +43,38 @@ def get_photo(hotel_id: str) -> Dict:
     return data
 
 
-# @track_api_exception
-# def get_destinations(destination: str, language: str = 'en_US') -> Dict:
-#     querystring = {"query": destination, "locale": language, "currency": "USD"}
-#
-#     request = requests.get(
-#             'https://hotels4.p.rapidapi.com/locations/v2/search',
-#             headers=headers,
-#             params=querystring,
-#             timeout=20
-#     )
-#     request.raise_for_status()
-#
-#     data = json.loads(request.text)
-#
-#     return data
+@track_api_exception
+def get_destinations(destination: str, language: str = 'en_US') -> Dict:
+    querystring = {"query": destination, "locale": language, "currency": "USD"}
+
+    request = requests.get(
+            'https://hotels4.p.rapidapi.com/locations/v2/search',
+            headers=headers,
+            params=querystring,
+            timeout=20
+    )
+    request.raise_for_status()
+
+    data = json.loads(request.text)
+
+    return data
 
 
 @track_api_exception
 def hotels_by_destination(
         destination_id: str, check_in: str, check_out: str, language: str = 'en_US',
         sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None) -> Dict:
-    # querystring = {
-    #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
-    #     "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
-    # }
     querystring = {
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
-        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
+        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
     }
+    # querystring = {
+    #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
+    #     "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
+    # }
     if price_range is not None:
-        querystring['priceMin'] = price_range[0]
-        querystring['priceMax'] = price_range[1]
+        querystring['priceMin'] = str(price_range[0])
+        querystring['priceMax'] = str(price_range[1])
     print(querystring)
 
     request = requests.get(
@@ -99,10 +99,10 @@ def hotels_by_destination(
 
 
 # для тестов
-def get_destinations(destination: str, language: str = 'en_US'):
-    with open('result.json', 'r') as file:
-        data = json.load(file)
-    return data
+# def get_destinations(destination: str, language: str = 'en_US'):
+#     with open('result.json', 'r') as file:
+#         data = json.load(file)
+#     return data
 
 
 # для тестов
