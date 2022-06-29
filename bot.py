@@ -28,8 +28,8 @@ class Commands(enum.Enum):
 
 class QueryContainer:
 
-    def __init__(self, user: int, command: Commands) -> None:
-        self.user = user
+    def __init__(self, user_id: int, command: Commands) -> None:
+        self.user = user_id
         self.command = command
         self.destination_id: Optional[str] = None
         self.destinations: Dict[str, str] = dict()

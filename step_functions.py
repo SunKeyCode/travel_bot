@@ -12,6 +12,7 @@ from bot import bot, queries, QueryContainer, Steps, Commands
 from typing import Callable, Dict
 import functools
 from re import fullmatch
+from DB import write_history
 
 
 MAX_HOTELS = 10
@@ -67,7 +68,7 @@ def print_start_message(message: Message) -> None:
 def first_step(message: Message, command: Commands) -> None:
     """Первый шаг для всех команд, кроме команды history"""
     bot.send_message(message.chat.id, 'Введите название города для поиска:')
-    queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(user=message.chat.id, command=command)
+    queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(user_id=int(message.chat.id), command=command)
     bot.register_next_step_handler(message, print_destinations)
 
 
@@ -178,7 +179,7 @@ def show_photo(message):
 
 @track_exception
 def print_hotels(message: Message) -> None:
-
+    """Печатает отели с фотографиями или без"""
     if queries[message.chat.id].show_photo:
         if not message.text.isdigit():
             bot.send_message(message.chat.id, 'О-оу! Тут нужно вводить цифру.')
@@ -209,6 +210,10 @@ def print_hotels(message: Message) -> None:
         limit=queries[message.chat.id].hotel_count,
         max_distance=queries[message.chat.id].max_distance
     )
+    queries[message.chat.id].hotels = hotels
+
+    write_history(queries[message.chat.id])
+
     if not hotels:
         bot.send_message(message.chat.id, '😞 По Вашему запросу не найдено ни одного отеля... Попробуйте '
                                           'изменить параметры поиска (например расширить диапазон цен).')
