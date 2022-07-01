@@ -1,18 +1,14 @@
-import lowprice
-import highprice
 from telebot.types import Message
 from time import sleep
-from bot import bot, Commands
+from loader import bot, Commands
 from logs import error_log
 from step_functions import first_step
 import DB
-from format import parse_history_data
+from utils.format import parse_history_data
 from step_functions import print_start_message
-import callback
+from utils.set_bot_commands import set_default_commands
 
-
-MAX_HOTELS = 10
-MAX_PHOTO = 10
+import handlers.callback_handlers.callback
 
 
 @bot.message_handler(commands=['start'])
@@ -44,12 +40,12 @@ def help_command(message: Message) -> None:
 
 @bot.message_handler(commands=['lowprice'])
 def low_price_command(message: Message) -> None:
-    lowprice.first_step(message)
+    first_step(message, Commands.lowprice)
 
 
 @bot.message_handler(commands=['highprice'])
 def high_price_command(message: Message) -> None:
-    highprice.first_step(message)
+    first_step(message, Commands.highprice)
 
 
 @bot.message_handler(commands=['bestdeal'])
@@ -62,7 +58,6 @@ def best_deal_command(message: Message) -> None:
     history_data = DB.get_history(message, 0)
     history_data = parse_history_data(history_data)
     for elem in history_data:
-        print(elem)
         bot.send_message(message.chat.id, elem, parse_mode='HTML')
 
     print_start_message(message)
@@ -74,6 +69,7 @@ def other_text(message: Message) -> None:
 
 
 DB.check_sql_tables()
+set_default_commands(bot)
 
 while True:
     try:

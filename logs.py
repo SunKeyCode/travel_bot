@@ -25,11 +25,3 @@ def error_log(exc: Exception, error_message: str, func: Optional[str] = None) ->
 
     with open('error_log.json', 'w', encoding='utf-8') as file:
         json.dump(current_data, file, ensure_ascii=False, indent=4)
-
-
-if __name__ == '__main__':
-    try:
-        print(123)
-        raise FileNotFoundError
-    except Exception as exc:
-        error_log(exc, '123')

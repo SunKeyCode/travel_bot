@@ -1,7 +1,8 @@
 from typing import Dict, List, Union
 import logs
 import re
-import datetime
+import datetime  # нужно для функции eval()
+from utils.misc.other_func import format_date
 
 
 def format_price(price: Union[int, str]) -> str:
@@ -86,12 +87,6 @@ def format_photo(photo: Dict, size) -> str:
         print('Ошибка поиска ключа:', exc)
         logs.error_log(exc, 'Ошибка ключа', f'{__name__}.{format_photo.__name__}')
         raise KeyError(f'Ошибка ключа в функции {__name__}.{format_photo.__name__}')
-
-
-def format_date(date: str) -> str:
-    new_date = date.split('-')
-    new_date = new_date[::-1]
-    return '.'.join(new_date)
 
 
 def parse_history_data(data: List) -> List[str]:

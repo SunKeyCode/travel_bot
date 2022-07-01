@@ -1,9 +1,8 @@
 import sqlite3 as sq
 from telebot.types import Message
-from bot import QueryContainer
-from datetime import datetime
-from format import format_history
-from typing import Dict, List
+from loader import QueryContainer
+from utils.format import format_history
+from typing import List
 from datetime import datetime, timedelta
 
 

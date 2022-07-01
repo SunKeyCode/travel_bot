@@ -8,7 +8,6 @@ from sys import platform
 
 destination_callback = CallbackData('destination_id', prefix='destination')
 photo_callback = CallbackData('answer', prefix='photo')
-command_callback = CallbackData('command_name', prefix='command')
 date_choice_callback = CallbackData('year', 'month', 'day', prefix='date_choice')
 change_month_callback = CallbackData('year', 'month', prefix='change_month')
 

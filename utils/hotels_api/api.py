@@ -2,7 +2,7 @@ import requests
 import json
 from typing import Dict, Tuple, Callable, Optional
 from logs import error_log
-from CustomExceptions import ApiRequestError
+from utils.CustomExceptions import ApiRequestError
 from functools import wraps
 from datetime import datetime
 
@@ -84,26 +84,3 @@ def hotels_by_destination(
     data = json.loads(request.text)
 
     return data
-
-
-# для тэстов
-# def get_photo_data(hotel_id: str = '634418464') -> Dict:
-#     with open('photo_634418464.json', 'r') as file:
-#         data = json.load(file)
-#
-#     return data
-
-
-# для тестов
-# def get_destinations(destination: str, language: str = 'en_US'):
-#     with open('result.json', 'r') as file:
-#         data = json.load(file)
-#     return data
-
-
-# для тестов
-# def hotels_by_destination(destination_id):
-#     with open(f'hotels_{destination_id}.json', 'r') as file:
-#         data = json.load(file)
-#
-#     return data

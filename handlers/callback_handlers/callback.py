@@ -1,8 +1,10 @@
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery
 
 import step_functions
-from bot import bot, queries, Steps, MAX_HOTELS, MAX_PHOTO
-from markup import change_month_callback, calendar_days_markup
+import keyboards.inline.inline_markup as inline_markup
+
+from loader import bot, queries, Steps
+from config_data import config
 from datetime import date
 
 
@@ -49,11 +51,11 @@ def calendar_callback(call: CallbackQuery) -> None:
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'change_month')
 def change_month(call: CallbackQuery) -> None:
     """Функция для выбора следующего/предыдущего месяца в календаре"""
-    callback_data: dict = change_month_callback.parse(callback_data=call.data)
+    callback_data: dict = inline_markup.change_month_callback.parse(callback_data=call.data)
     year, month = int(callback_data['year']), int(callback_data['month'])
     bot.edit_message_reply_markup(
         call.message.chat.id, call.message.id,
-        reply_markup=calendar_days_markup(year=year, month=month)
+        reply_markup=inline_markup.calendar_days_markup(year=year, month=month)
     )
 
 
@@ -62,7 +64,6 @@ def destination_callback(call: CallbackQuery):
     """Получение destination"""
     bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
     destination_id = call.data.split(':')[1]
-    # bot.send_message(call.message.chat.id, '✅ ' + queries[call.message.chat.id].destinations[destination_id])
     bot.edit_message_text(
         chat_id=call.message.chat.id,
         message_id=call.message.id,
@@ -80,7 +81,7 @@ def photo_callback(call: CallbackQuery):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.id,
-            text=f'Сколько фотографий показать? Не больше {MAX_PHOTO}'
+            text=f'Сколько фотографий показать? Не больше {config.MAX_PHOTO}'
         )
         queries[call.message.chat.id].show_photo = True
         queries[call.message.chat.id].photo_count = call.data.split(':')[1]

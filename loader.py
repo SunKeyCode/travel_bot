@@ -2,13 +2,10 @@ import telebot
 import enum
 from datetime import date
 from typing import Optional, Dict
+from config_data.config import BOT_TOKEN
 
 
-TOKEN = '5178171548:AAGudbH7zz4sJpE6UNW1e2DX5ALUhy6ZS9w'
-bot = telebot.TeleBot(TOKEN)
-
-MAX_HOTELS = 10
-MAX_PHOTO = 10
+bot = telebot.TeleBot(BOT_TOKEN)
 
 
 class Steps(enum.Enum):
@@ -47,7 +44,7 @@ class QueryContainer:
 
     def __str__(self):
         return 'user={user}\ndestination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \
-                'show_photo={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n' \
+                'get_hotels_count={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n' \
                'check_in={check_in}\ncheck_out={check_out}\nmin_price={min_price}\nmax_price={max_price}\n' \
                'max_distance={max_distance}\n'.format(
                     user=self.user,
