@@ -11,7 +11,6 @@ from datetime import date
 def callback_to_date(callback_data: str) -> date:
     callback_list = callback_data.split(':')
     result = date(int(callback_list[1]), int(callback_list[2]), int(callback_list[3]))
-
     return result
 
 

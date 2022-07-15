@@ -1,7 +1,9 @@
-from typing import Dict, List, Union
-import logs
 import re
 import datetime  # нужно для функции eval()
+
+import logs.logs as log
+
+from typing import Dict, List, Union
 from utils.misc.other_func import format_date
 
 
@@ -29,13 +31,17 @@ def format_hotel(hotel: Dict, date_delta: int, currency: str) -> str:
     address.append(hotel['address'].get('streetAddress', ''))
     address = list(filter(lambda elem: elem, address))
     address = ', '.join(address)
-    distance = hotel['landmarks'][0]['distance']
+    try:
+        distance = hotel['landmarks'][0]['distance']
+    except IndexError:
+        distance = '-'
+
     try:
         price = int(round(float(hotel['ratePlan']['price']['exactCurrent'])))
     except ValueError as exc:
         price = 0
         print(exc)
-        logs.error_log(exc, f'Ошибка преобразования типа в {hotel}', f'{__name__}.{format_hotel.__name__}')
+        log.error_log(exc, f'Ошибка преобразования типа в {hotel}', f'{__name__}.{format_hotel.__name__}')
 
     try:
         total_price = re.findall(
@@ -63,13 +69,17 @@ def format_history(hotel: Dict, currency: str) -> str:
         currency = 'руб.'
 
     name = hotel['name']
-    distance = hotel['landmarks'][0]['distance']
+
+    try:
+        distance = hotel['landmarks'][0]['distance']
+    except IndexError:
+        distance = '-'
     try:
         price = int(round(float(hotel['ratePlan']['price']['exactCurrent'])))
     except ValueError as exc:
         price = 0
         print(exc)
-        logs.error_log(exc, f'Ошибка преобразования типа в {hotel}', f'{__name__}.{format_hotel.__name__}')
+        log.error_log(exc, f'Ошибка преобразования типа в {hotel}', f'{__name__}.{format_hotel.__name__}')
 
     hotel_content = list()
 
@@ -85,7 +95,7 @@ def format_photo(photo: Dict, size) -> str:
         return photo['baseUrl'].format(size=size)
     except KeyError as exc:
         print('Ошибка поиска ключа:', exc)
-        logs.error_log(exc, 'Ошибка ключа', f'{__name__}.{format_photo.__name__}')
+        log.error_log(exc, 'Ошибка ключа', f'{__name__}.{format_photo.__name__}')
         raise KeyError(f'Ошибка ключа в функции {__name__}.{format_photo.__name__}')
 
 

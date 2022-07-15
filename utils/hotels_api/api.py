@@ -1,7 +1,9 @@
 import requests
 import json
+
+import logs.logs as log
+
 from typing import Dict, Tuple, Callable, Optional
-from logs import error_log
 from utils.CustomExceptions import ApiRequestError
 from functools import wraps
 from datetime import datetime
@@ -20,7 +22,7 @@ def track_api_exception(func: Callable) -> Callable:
         try:
             return func(*args, **kwargs)
         except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-            error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{func.__name__}')
+            log.error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{func.__name__}')
             print(f'{datetime.now()} Ошибка при работе с requests:', exc)
             raise ApiRequestError
     return wrapper

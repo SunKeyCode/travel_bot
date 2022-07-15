@@ -6,8 +6,10 @@ from typing import Optional
 
 def error_log(exc: Exception, error_message: str, func: Optional[str] = None) -> None:
 
-    if os.path.exists(os.path.abspath('error_log.json')):
-        with open('error_log.json', 'r', encoding='utf-8') as file:
+    path = 'logs/error_log.json'
+
+    if os.path.exists(os.path.abspath(path)):
+        with open(path, 'r', encoding='utf-8') as file:
             current_data = json.load(file)
     else:
         current_data = dict()
@@ -23,5 +25,5 @@ def error_log(exc: Exception, error_message: str, func: Optional[str] = None) ->
     else:
         current_data[datetime.datetime.today().date().__str__()].append(new_error)
 
-    with open('error_log.json', 'w', encoding='utf-8') as file:
+    with open(path, 'w', encoding='utf-8') as file:
         json.dump(current_data, file, ensure_ascii=False, indent=4)

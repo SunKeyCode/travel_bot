@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Callable
 import re
-import logs
+import logs.logs as log
 from functools import wraps
 from datetime import datetime
 
@@ -13,7 +13,7 @@ def track_key_error(func: Callable) -> Callable:
             return func(*args, **kwargs)
         except KeyError as exc:
             print(f'{datetime.now()} Ошибка поиска ключа в функции {__name__}.{func.__name__}:', exc)
-            logs.error_log(exc, 'Ошибка ключа', f'{__name__}.{func.__name__}')
+            log.error_log(exc, 'Ошибка ключа', f'{__name__}.{func.__name__}')
             raise KeyError(f'Ошибка ключа в функции {__name__}.{func.__name__}')
 
     return wrapper
@@ -31,8 +31,11 @@ def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[di
 
     if max_distance is not None:
         items = data['data']['body']['searchResults']['results']
-        result_data = filter(lambda item: distance_from_str(item['landmarks'][0]['distance']) <= max_distance, items)
-        result_data = sorted(result_data, key=lambda elem: elem['ratePlan']['price']['exactCurrent'])
+        try:
+            result_data = filter(lambda item: distance_from_str(item['landmarks'][0]['distance']) <= max_distance, items)
+            result_data = sorted(result_data, key=lambda elem: elem['ratePlan']['price']['exactCurrent'])
+        except IndexError:
+            return data['data']['body']['searchResults']['results'][:limit]
         return list(result_data)[:limit]
     else:
         return data['data']['body']['searchResults']['results'][:limit]
@@ -54,7 +57,7 @@ def destinations(request_data: Dict) -> List[Dict]:
             elem['caption'] = re.sub(r'<[/]?span.*?>', '', elem['caption'])
         except IndexError as exc:
             print(f'При форматировании строки {elem} возникла ошибка', exc)
-            logs.error_log(exc, f"Ошибка в строке {elem['caption']}", destinations.__name__)
+            log.error_log(exc, f"Ошибка в строке {elem['caption']}", destinations.__name__)
 
     return request_data['suggestions'][0]['entities']
 

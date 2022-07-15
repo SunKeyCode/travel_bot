@@ -2,15 +2,15 @@ from utils.hotels_api import api
 from utils import attributes, format
 from utils.misc.other_func import define_lang, get_sort_order
 import keyboards.inline.inline_markup as inline_markup
+import logs.logs as log
 
-from logs import error_log
 from utils.CustomExceptions import ApiRequestError
 from datetime import date
 from telebot.types import Message, InputMediaPhoto
 from loader import bot, queries, QueryContainer, Steps, Commands
 from typing import Callable, Dict
 import functools
-from DB import write_history
+from database.DB import write_history
 from config_data import config
 
 
@@ -22,15 +22,18 @@ def track_exception(func: Callable) -> Callable:
             return func(message, *args, **kwargs)
         except KeyError:
             bot.send_message(message.chat.id, '❗ Упс... Что-то пошло не так при расшифровке ответа от сервера. '
-                                              'Попробуйте повторить всё с начала.')
+                                              'Попробуйте повторить всё сначала.')
+            print_start_message(message)
         except ApiRequestError:
             bot.send_message(message.chat.id, '❗ Упс... Что-то пошло не так при запросе к серверу. '
-                                              'Попробуйте повторить всё с начала.')
+                                              'Попробуйте повторить всё сначала.')
+            print_start_message(message)
         except Exception as exc:
-            error_log(exc, 'Непредвиденное исключение', func.__name__)
+            log.error_log(exc, 'Непредвиденное исключение', func.__name__)
             bot.send_message(message.chat.id, '❗ Упс... Что-то пошло не так. '
-                                              'Попробуйте повторить всё с начала.')
+                                              'Попробуйте повторить всё сначала.')
             print(f'Исключение в функции {func.__name__}', exc)
+            print_start_message(message)
 
     return wrapper
 
@@ -41,7 +44,10 @@ def print_start_message(message: Message) -> None:
                                       '/highprice - топ самых дорогих отелей в городе.\n'
                                       '/bestdeal - топ отелей, '
                                       'наиболее подходящих по цене и расположению от центра.\n'
-                                      '/history - показать историю поиска отелей.')
+                                      '/history - показать историю поиска отелей.\n'
+                                      '/settings - настройки бота.\n'
+                                      '/help - показать список команд.'
+                     )
 
 
 def first_step(message: Message, command: Commands) -> None:
@@ -188,6 +194,7 @@ def print_hotels(message: Message) -> None:
         limit=queries[message.chat.id].hotel_count,
         max_distance=queries[message.chat.id].max_distance
     )
+
     queries[message.chat.id].hotels = hotels
 
     write_history(queries[message.chat.id])
