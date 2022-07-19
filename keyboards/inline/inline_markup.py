@@ -1,5 +1,8 @@
 import calendar
 import locale
+
+from typing import Optional
+from loader import Locale, Currency
 from datetime import date, timedelta
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.callback_data import CallbackData
@@ -20,6 +23,30 @@ elif platform == 'darwin':
 
 WEEK_DAYS = [calendar.day_abbr[i] for i in range(7)]
 MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+
+def settings_markup(mode: str = 'main', current: Optional[str] = None) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    if mode == 'main':
+        markup.add(InlineKeyboardButton('Язык запросов (locale)', callback_data='settings:main:locale'))
+        markup.add(InlineKeyboardButton('Валюта (currency)', callback_data='settings:main:currency'))
+        markup.add(InlineKeyboardButton('❌ Выход', callback_data='settings:main:exit'))
+    elif mode == 'locale':
+        for elem in Locale:
+            if current == elem.name:
+                markup.add(InlineKeyboardButton(f'{elem.value} ☑', callback_data=f'settings:locale:{elem.name}'))
+            else:
+                markup.add(InlineKeyboardButton(f'{elem.value}', callback_data=f'settings:locale:{elem.name}'))
+        markup.add(InlineKeyboardButton('🔙 Назад', callback_data='settings:locale:exit'))
+    elif mode == 'currency':
+        for elem in Currency:
+            if current == elem.name:
+                markup.add(InlineKeyboardButton(f'{elem.value}  ☑', callback_data=f'settings:currency:{elem.name}'))
+            else:
+                markup.add(InlineKeyboardButton(f'{elem.value}', callback_data=f'settings:currency:{elem.name}'))
+        markup.add(InlineKeyboardButton('🔙 Назад', callback_data='settings:currency:exit'))
+
+    return markup
 
 
 def yes_no_markup() -> InlineKeyboardMarkup:

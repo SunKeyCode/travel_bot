@@ -53,11 +53,7 @@ def photo(data, limit: Optional[int] = None) -> List[dict]:
 @track_key_error
 def destinations(request_data: Dict) -> List[Dict]:
     for elem in request_data['suggestions'][0]['entities']:
-        try:  # убрать???
-            elem['caption'] = re.sub(r'<[/]?span.*?>', '', elem['caption'])
-        except IndexError as exc:
-            print(f'При форматировании строки {elem} возникла ошибка', exc)
-            log.error_log(exc, f"Ошибка в строке {elem['caption']}", destinations.__name__)
+        elem['caption'] = re.sub(r'<[/]?span.*?>', '', elem['caption'])
 
     return request_data['suggestions'][0]['entities']
 

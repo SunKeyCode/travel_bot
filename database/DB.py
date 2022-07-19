@@ -17,7 +17,7 @@ def get_path() -> str:
 
 
 def check_user_settings(message: Message):
-    with sq.connect('database/tet_bot.db') as connect:
+    with sq.connect(get_path()) as connect:
         cursor = connect.cursor()
 
         cursor.execute(f'SELECT user_id FROM settings WHERE user_id == {int(message.chat.id)}')
@@ -28,7 +28,7 @@ def check_user_settings(message: Message):
 
 
 def check_sql_tables() -> None:
-    with sq.connect('database/tet_bot.db') as con:
+    with sq.connect(get_path()) as con:
         cursor = con.cursor()
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS settings (
@@ -75,7 +75,7 @@ def write_history(query: QueryContainer) -> None:
         result.append(format_history(elem, currency=query.currency))
     result = '\n\n'.join(result)
 
-    with sq.connect('database/tet_bot.db') as sql_connect:
+    with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
         cursor.execute(
             'INSERT INTO queries (user_id, command, date, time, params, result) VALUES (?, ?, ?, ?, ?, ?)',
@@ -87,7 +87,7 @@ def read_history(message: Message, depth: int) -> List:
 
     date_filter = (datetime.now().date() - timedelta(depth)).strftime('%Y-%m-%d')
 
-    with sq.connect('database/tet_bot.db') as sql_connect:  # сделать через модуль os?
+    with sq.connect(get_path()) as sql_connect:
         sql_connect.row_factory = sq.Row
         cursor = sql_connect.cursor()
         cursor.execute(
@@ -107,6 +107,46 @@ def read_history(message: Message, depth: int) -> List:
             result.append(query)
 
     return result
+
+
+def set_locale(message: Message, locale: str) -> None:
+    with sq.connect(get_path()) as sql_connect:
+        cursor = sql_connect.cursor()
+        cursor.execute(
+            f'UPDATE settings SET locale = "{locale}" WHERE user_id = {int(message.chat.id)}'
+        )
+
+
+def set_currency(message: Message, currency: str) -> None:
+    with sq.connect(get_path()) as sql_connect:
+        cursor = sql_connect.cursor()
+        cursor.execute(
+            f'UPDATE settings SET currency = "{currency}" WHERE user_id = {int(message.chat.id)}'
+        )
+
+
+def get_locale(message: Message) -> str:
+    with sq.connect(get_path()) as sql_connect:
+        cursor = sql_connect.cursor()
+        cursor.execute(
+            f'SELECT locale FROM settings WHERE user_id = {int(message.chat.id)}'
+        )
+
+        result = cursor.fetchone()
+
+    return result[0]
+
+
+def get_currency(message: Message) -> str:
+    with sq.connect(get_path()) as sql_connect:
+        cursor = sql_connect.cursor()
+        cursor.execute(
+            f'SELECT currency FROM settings WHERE user_id = {int(message.chat.id)}'
+        )
+
+        result = cursor.fetchone()
+
+    return result[0]
 
 
 if __name__ == '__main__':

@@ -4,9 +4,17 @@ import os
 from typing import Optional
 
 
+def get_path() -> str:
+    directory = 'logs'
+    file = 'error_log.json'
+    db_path = os.path.join(directory, file)
+
+    return db_path
+
+
 def error_log(exc: Exception, error_message: str, func: Optional[str] = None) -> None:
 
-    path = 'logs/error_log.json'
+    path = get_path()
 
     if os.path.exists(os.path.abspath(path)):
         with open(path, 'r', encoding='utf-8') as file:

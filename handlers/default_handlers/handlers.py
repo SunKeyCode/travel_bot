@@ -2,7 +2,9 @@ from telebot.types import Message
 from step_functions import print_start_message, first_step
 from loader import bot, Commands
 from database import DB
+from keyboards.inline import inline_markup
 from utils.format import parse_history_data
+from config_data import config
 
 
 @bot.message_handler(commands=['start'])
@@ -34,7 +36,7 @@ def best_deal_command(message: Message) -> None:
 
 @bot.message_handler(commands=['history'])
 def history(message: Message) -> None:
-    history_data = DB.read_history(message, 0)
+    history_data = DB.read_history(message, config.HISTORY_DEPTH)
     history_data = parse_history_data(history_data)
     for elem in history_data:
         bot.send_message(message.chat.id, elem, parse_mode='HTML')
@@ -44,8 +46,8 @@ def history(message: Message) -> None:
 
 @bot.message_handler(commands=['settings'])
 def settings(message: Message) -> None:
-    bot.send_message(message.chat.id, '...')
-    # Здесь будет обработчик settings
+    print(DB.get_locale(message))
+    bot.send_message(message.chat.id, '🔧 Настройки: ', reply_markup=inline_markup.settings_markup())
 
 
 @bot.message_handler(content_types='text')

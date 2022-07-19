@@ -2,6 +2,7 @@ from telebot.types import CallbackQuery
 
 import step_functions
 import keyboards.inline.inline_markup as inline_markup
+import database.DB as DB
 
 from loader import bot, queries, Steps
 from config_data import config
@@ -92,3 +93,58 @@ def photo_callback(call: CallbackQuery):
             text=f'Ищем отели... ⌛'
         )
         step_functions.print_hotels(message=call.message)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'settings')
+def settings_callback(call: CallbackQuery):
+    """Навигация по меню настроек бота"""
+    submenu = call.data.split(':')[1]
+    data = call.data.split(':')[2]
+
+    if submenu == 'main':
+        if data == 'locale':
+            current = DB.get_locale(call.message)
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='locale', current=current))
+        elif data == 'currency':
+            current = DB.get_currency(call.message)
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='currency', current=current))
+        elif data == 'exit':
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                text='Настройка завершена.'
+
+            )
+            step_functions.print_start_message(call.message)
+
+    elif submenu == 'locale':
+        if data == 'exit':
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='main'))
+        else:
+            DB.set_locale(call.message, data)
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='locale', current=data))
+
+    elif submenu == 'currency':
+        if data == 'exit':
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='main'))
+        else:
+            DB.set_currency(call.message, data)
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.id,
+                reply_markup=inline_markup.settings_markup(mode='currency', current=data))

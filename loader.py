@@ -23,6 +23,18 @@ class Commands(enum.Enum):
     history = 'history'
 
 
+class Locale(enum.Enum):
+
+    en_US = '🇺🇸 Английский'
+    ru_RU = '🇷🇺 Русский'
+
+
+class Currency(enum.Enum):
+
+    RUB = 'Рубли'
+    USD = 'Доллары'
+
+
 class QueryContainer:
 
     def __init__(self, user_id: int, command: Commands) -> None:
