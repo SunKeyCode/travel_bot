@@ -77,9 +77,9 @@ def next_step(message: Message, curr_step: Steps) -> None:
         price_range = '50 100'
 
     if curr_step == Steps.destination:
-        get_date(message, 'Выберите дату заезда 📅:')
+        get_date(message, 'Выберите дату заезда 📅:', date.today())
     elif curr_step == Steps.checkin_date:
-        get_date(message, 'Выберите дату выезда 📅:')
+        get_date(message, 'Выберите дату выезда 📅:', queries[message.chat.id].checkin_date)
     elif curr_step == Steps.checkout_date:
         if queries[message.chat.id].command in (Commands.lowprice, Commands.highprice):
             bot.send_message(message.chat.id, text=f'Сколько отелей показать? Не больше {config.MAX_HOTELS}')
@@ -112,9 +112,13 @@ def print_destinations(message: Message) -> None:
         print_start_message(message)
 
 
-def get_date(message: Message, text: str):
+def get_date(message: Message, text: str, limit_date: date):
     now = date.today()
-    bot.send_message(message.chat.id, text, reply_markup=inline_markup.calendar_days_markup(now.year, now.month))
+    bot.send_message(
+        chat_id=message.chat.id,
+        text=text,
+        reply_markup=inline_markup.calendar_days_markup(now.year, limit_date.month, limit_date)
+    )
 
 
 def get_price_range(message: Message) -> None:
@@ -149,7 +153,7 @@ def get_max_distance(message: Message) -> None:
             raise ValueError
     except (TypeError, ValueError):
         bot.send_message(message.chat.id, '❌ О-оу... вы что-то не так ввели. Расстояние до цента должно вводится '
-                                          'числом и быть больше 0, попробуйте ще раз:')
+                                          'числом и быть больше 0 (например 3.5 или 5), попробуйте ще раз:')
         bot.register_next_step_handler(message, get_max_distance)
 
 

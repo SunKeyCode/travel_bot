@@ -3,6 +3,7 @@ import re
 import logs.logs as log
 from functools import wraps
 from datetime import datetime
+from utils.misc.other_func import distance_from_str
 
 
 def track_key_error(func: Callable) -> Callable:
@@ -19,16 +20,8 @@ def track_key_error(func: Callable) -> Callable:
     return wrapper
 
 
-def distance_from_str(distance_str: str) -> float:
-    distance_str = distance_str.split()[0]
-    if distance_str.count(','):
-        distance_str = distance_str.replace(',', '.')
-    return float(distance_str)
-
-
 @track_key_error
 def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[dict]:
-
     if max_distance is not None:
         items = data['data']['body']['searchResults']['results']
         try:

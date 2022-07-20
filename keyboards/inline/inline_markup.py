@@ -28,8 +28,8 @@ MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
 def settings_markup(mode: str = 'main', current: Optional[str] = None) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     if mode == 'main':
-        markup.add(InlineKeyboardButton('Язык запросов (locale)', callback_data='settings:main:locale'))
-        markup.add(InlineKeyboardButton('Валюта (currency)', callback_data='settings:main:currency'))
+        markup.add(InlineKeyboardButton('язык запросов (locale)', callback_data='settings:main:locale'))
+        markup.add(InlineKeyboardButton('валюта (currency)', callback_data='settings:main:currency'))
         markup.add(InlineKeyboardButton('❌ Выход', callback_data='settings:main:exit'))
     elif mode == 'locale':
         for elem in Locale:
@@ -75,9 +75,8 @@ def link_markup(caption: str, url: str):
     return markup
 
 
-def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
+def calendar_days_markup(year: int, month: int, limit_date: Optional[date] = None) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(row_width=7)
-    today = date.today()
 
     keyboard.add(
         InlineKeyboardButton(
@@ -90,19 +89,22 @@ def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
         week_buttons = []
         for day in week:
             day_name = ' '
-            if day == today.day and today.year == year and today.month == month:
+            if day == limit_date.day and limit_date.year == year and limit_date.month == month:
                 day_name = '🔘'
                 button = InlineKeyboardButton(
                     text=day_name,
-                    callback_data=date_choice_callback.new(year=year, month=month, day=today.day)
+                    callback_data=date_choice_callback.new(year=year, month=month, day=limit_date.day)
                 )
-            elif (day != 0 and day > today.day) or (day != 0 and today.month < month):
-            # elif day > today.day:
-                day_name = str(day)
-                button = InlineKeyboardButton(
-                    text=day_name,
-                    callback_data=date_choice_callback.new(year=year, month=month, day=day_name)
-                )
+            elif day != 0:
+                curr_date = date(year=year, month=month, day=day)
+                if curr_date > limit_date:
+                    day_name = str(day)
+                    button = InlineKeyboardButton(
+                        text=day_name,
+                        callback_data=date_choice_callback.new(year=year, month=month, day=day_name)
+                    )
+                else:
+                    button = InlineKeyboardButton(text=day_name, callback_data=EMTPY_FIELD)
             else:
                 button = InlineKeyboardButton(text=day_name, callback_data=EMTPY_FIELD)
             week_buttons.append(button)
@@ -110,14 +112,19 @@ def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
 
     previous_date = date(year=year, month=month, day=1) - timedelta(days=1)
     next_date = date(year=year, month=month, day=1) + timedelta(days=31)
-
+    if previous_date >= limit_date:
+        callback_date = change_month_callback.new(year=previous_date.year, month=previous_date.month)
+        text = '⬅ пред. месяц'
+    else:
+        callback_date = EMTPY_FIELD
+        text = ' '
     keyboard.add(
         InlineKeyboardButton(
-            text='⬅ предыдущий месяц',
-            callback_data=change_month_callback.new(year=previous_date.year, month=previous_date.month)
+            text=text,
+            callback_data=callback_date
         ),
         InlineKeyboardButton(
-            text='следующий месяц ➡',
+            text='след. месяц ➡',
             callback_data=change_month_callback.new(year=next_date.year, month=next_date.month)
         )
     )

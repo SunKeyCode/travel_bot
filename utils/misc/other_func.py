@@ -22,3 +22,18 @@ def get_sort_order(command: Commands) -> str:
         return 'PRICE_HIGHEST_FIRST'
     elif command == Commands.bestdeal:
         return 'DISTANCE_FROM_LANDMARK'
+
+
+def distance_from_str(distance_str: str) -> float:
+    distance_str = distance_str.split()[0]
+    if distance_str.count(','):
+        distance_str = distance_str.replace(',', '.')
+    return float(distance_str)
+
+
+def miles_to_kilometers(value: float) -> float:
+    return round(value * 1.609344, 2)
+
+
+def kilometers_to_miles(value: float) -> float:
+    return round(value / 1.609344, 2)

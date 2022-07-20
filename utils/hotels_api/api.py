@@ -7,11 +7,12 @@ from typing import Dict, Tuple, Callable, Optional
 from utils.CustomExceptions import ApiRequestError
 from functools import wraps
 from datetime import datetime
+from config_data.config import API_KEY, API_HOST
 
 
 headers = {
-    "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
-    "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
+    "X-RapidAPI-Host": API_HOST,
+    "X-RapidAPI-Key": API_KEY
     }
 
 

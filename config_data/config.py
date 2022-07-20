@@ -1,6 +1,13 @@
-# подгрузить переменные окружения, см. видео
+import os
 
-BOT_TOKEN = '5178171548:AAGudbH7zz4sJpE6UNW1e2DX5ALUhy6ZS9w'
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+API_KEY = os.getenv('API_KEY')
+API_HOST = "hotels4.p.rapidapi.com"
 
 MAX_HOTELS = 10
 MAX_PHOTO = 10

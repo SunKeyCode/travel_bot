@@ -45,7 +45,11 @@ def calendar_callback(call: CallbackQuery) -> None:
                 message_id=call.message.id,
                 text='❌ Дата выезда должна быть больше даты заезда! Попробуем еще раз:'
             )
-            step_functions.get_date(call.message, 'Выберите дату выезда 📅:')
+            step_functions.get_date(
+                message=call.message,
+                text='Выберите дату выезда 📅:',
+                limit_date=queries[call.message.chat.id].checkin_date
+            )
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'change_month')
@@ -53,9 +57,15 @@ def change_month(call: CallbackQuery) -> None:
     """Функция для выбора следующего/предыдущего месяца в календаре"""
     callback_data: dict = inline_markup.change_month_callback.parse(callback_data=call.data)
     year, month = int(callback_data['year']), int(callback_data['month'])
+
+    if queries[call.message.chat.id].checkin_date:
+        limit_date = queries[call.message.chat.id].checkin_date
+    else:
+        limit_date = date.today()
+
     bot.edit_message_reply_markup(
         call.message.chat.id, call.message.id,
-        reply_markup=inline_markup.calendar_days_markup(year=year, month=month)
+        reply_markup=inline_markup.calendar_days_markup(year=year, month=month, limit_date=limit_date)
     )
 
 
@@ -76,7 +86,6 @@ def destination_callback(call: CallbackQuery):
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'photo')
 def photo_callback(call: CallbackQuery):
     """Показывать фотографии или нет"""
-    # bot.answer_callback_query(callback_query_id=call.id, text='Выполнено', cache_time=2)
     if call.data.split(':')[1] == 'yes':
         bot.edit_message_text(
             chat_id=call.message.chat.id,

@@ -49,6 +49,7 @@ class QueryContainer:
         self.language: str = 'en_US'
         self.locale: str = 'en_US'
         self.currency: str = 'USD'
+        self.distance_units = 'miles'
         self.checkin_date: Optional[date] = None
         self.checkout_date: Optional[date] = None
         self.min_price: Optional[int] = None
