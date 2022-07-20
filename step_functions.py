@@ -10,7 +10,7 @@ from telebot.types import Message, InputMediaPhoto
 from loader import bot, queries, QueryContainer, Steps, Commands
 from typing import Callable, Dict
 import functools
-from database.DB import write_history
+from database.DB import write_history, get_currency, get_locale
 from config_data import config
 
 
@@ -50,19 +50,26 @@ def print_start_message(message: Message) -> None:
                      )
 
 
+def load_settings(message: Message) -> None:
+    queries[message.chat.id].currency = get_currency(message)
+    queries[message.chat.id].locale = get_locale(message)
+
+
 def first_step(message: Message, command: Commands) -> None:
     """Первый шаг для всех команд, кроме команды history"""
     bot.send_message(message.chat.id, 'Введите название города для поиска:')
     queries[message.chat.id]: Dict[QueryContainer] = QueryContainer(user_id=int(message.chat.id), command=command)
+    load_settings(message)
     bot.register_next_step_handler(message, print_destinations)
 
 
 def next_step(message: Message, curr_step: Steps) -> None:
     """Определяем следующий шаг в зависимости от текущей команды"""
-    if queries[message.chat.id].currency == 'USD':
+    curr_setting = queries[message.chat.id].currency
+    if curr_setting == 'USD':
         currency = 'долларах'
         price_range = '50 100'
-    elif queries[message.chat.id].currency == 'RUB':
+    elif curr_setting == 'RUB':
         currency = 'рублях'
         price_range = '1000 5000'
     else:
@@ -182,14 +189,17 @@ def print_hotels(message: Message) -> None:
     else:
         price_range = (queries[message.chat.id].min_price, queries[message.chat.id].max_price)
 
+    currency = queries[message.chat.id].currency
+
     hotels = attributes.hotels(
         api.hotels_by_destination(
             destination_id=queries[message.chat.id].destination_id,
             check_in=queries[message.chat.id].checkin_date.strftime('%Y-%m-%d'),
             check_out=queries[message.chat.id].checkout_date.strftime('%Y-%m-%d'),
-            language=queries[message.chat.id].language,
+            locale=queries[message.chat.id].locale,
             sort_order=get_sort_order(queries[message.chat.id].command),
-            price_range=price_range
+            price_range=price_range,
+            currency=currency
         ),
         limit=queries[message.chat.id].hotel_count,
         max_distance=queries[message.chat.id].max_distance
@@ -206,7 +216,6 @@ def print_hotels(message: Message) -> None:
         return
 
     date_delta = queries[message.chat.id].checkout_date - queries[message.chat.id].checkin_date
-    currency = queries[message.chat.id].currency
 
     if queries[message.chat.id].show_photo:
         for i_hotel in hotels:

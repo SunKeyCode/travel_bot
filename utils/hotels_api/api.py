@@ -11,7 +11,7 @@ from datetime import datetime
 
 headers = {
     "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
-    "X-RapidAPI-Key": "c04f114153msh278b5381d234270p172fb2jsnc51cd5ea874b"
+    "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
     }
 
 
@@ -64,11 +64,12 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
 
 @track_api_exception
 def hotels_by_destination(
-        destination_id: str, check_in: str, check_out: str, language: str = 'en_US',
-        sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None) -> Dict:
+        destination_id: str, check_in: str, check_out: str, locale: str = 'en_US',
+        sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None, currency: str = 'USD') -> Dict:
+
     querystring = {
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
-        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
+        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": locale, "currency": currency
     }
     if price_range is not None:
         querystring['priceMin'] = str(price_range[0])

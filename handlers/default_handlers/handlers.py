@@ -46,7 +46,6 @@ def history(message: Message) -> None:
 
 @bot.message_handler(commands=['settings'])
 def settings(message: Message) -> None:
-    print(DB.get_locale(message))
     bot.send_message(message.chat.id, '🔧 Настройки: ', reply_markup=inline_markup.settings_markup())
 
 

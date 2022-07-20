@@ -96,7 +96,8 @@ def calendar_days_markup(year: int, month: int) -> InlineKeyboardMarkup:
                     text=day_name,
                     callback_data=date_choice_callback.new(year=year, month=month, day=today.day)
                 )
-            elif day != 0:
+            elif (day != 0 and day > today.day) or (day != 0 and today.month < month):
+            # elif day > today.day:
                 day_name = str(day)
                 button = InlineKeyboardButton(
                     text=day_name,

@@ -47,6 +47,7 @@ class QueryContainer:
         self.show_photo: bool = False
         self.photo_count: int = 0
         self.language: str = 'en_US'
+        self.locale: str = 'en_US'
         self.currency: str = 'USD'
         self.checkin_date: Optional[date] = None
         self.checkout_date: Optional[date] = None

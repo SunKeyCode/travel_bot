@@ -76,7 +76,7 @@ def destination_callback(call: CallbackQuery):
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'photo')
 def photo_callback(call: CallbackQuery):
     """Показывать фотографии или нет"""
-    bot.answer_callback_query(callback_query_id=call.id, text='Выполнено')
+    # bot.answer_callback_query(callback_query_id=call.id, text='Выполнено', cache_time=2)
     if call.data.split(':')[1] == 'yes':
         bot.edit_message_text(
             chat_id=call.message.chat.id,
@@ -97,7 +97,7 @@ def photo_callback(call: CallbackQuery):
 
 @bot.callback_query_handler(func=lambda call: call.data.split(':')[0] == 'settings')
 def settings_callback(call: CallbackQuery):
-    """Навигация по меню настроек бота"""
+    """Навигация по меню настроек бота (команды settings)"""
     submenu = call.data.split(':')[1]
     data = call.data.split(':')[2]
 
@@ -121,7 +121,6 @@ def settings_callback(call: CallbackQuery):
                 text='Настройка завершена.'
 
             )
-            step_functions.print_start_message(call.message)
 
     elif submenu == 'locale':
         if data == 'exit':
@@ -130,11 +129,14 @@ def settings_callback(call: CallbackQuery):
                 message_id=call.message.id,
                 reply_markup=inline_markup.settings_markup(mode='main'))
         else:
-            DB.set_locale(call.message, data)
-            bot.edit_message_reply_markup(
-                chat_id=call.message.chat.id,
-                message_id=call.message.id,
-                reply_markup=inline_markup.settings_markup(mode='locale', current=data))
+            if DB.get_locale(call.message) != data:
+                DB.set_locale(call.message, data)
+                bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.id,
+                    reply_markup=inline_markup.settings_markup(mode='locale', current=data))
+            else:
+                bot.answer_callback_query(callback_query_id=call.id, text='Значение уже установлено!', cache_time=2)
 
     elif submenu == 'currency':
         if data == 'exit':
@@ -143,8 +145,11 @@ def settings_callback(call: CallbackQuery):
                 message_id=call.message.id,
                 reply_markup=inline_markup.settings_markup(mode='main'))
         else:
-            DB.set_currency(call.message, data)
-            bot.edit_message_reply_markup(
-                chat_id=call.message.chat.id,
-                message_id=call.message.id,
-                reply_markup=inline_markup.settings_markup(mode='currency', current=data))
+            if DB.get_currency(call.message) != data:
+                DB.set_currency(call.message, data)
+                bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.id,
+                    reply_markup=inline_markup.settings_markup(mode='currency', current=data))
+            else:
+                bot.answer_callback_query(callback_query_id=call.id, text='Значение уже установлено!', cache_time=2)
