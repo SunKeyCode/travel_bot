@@ -53,6 +53,12 @@ def print_start_message(message: Message) -> None:
 def load_settings(message: Message) -> None:
     queries[message.chat.id].currency = get_currency(message)
     queries[message.chat.id].locale = get_locale(message)
+    if queries[message.chat.id].locale == 'en_US':
+        queries[message.chat.id].distance_units = 'miles'
+    elif queries[message.chat.id].locale == 'ru_RU':
+        queries[message.chat.id].distance_units = 'km'
+    else:
+        queries[message.chat.id].distance_units = 'miles'
 
 
 def first_step(message: Message, command: Commands) -> None:
@@ -123,6 +129,13 @@ def get_date(message: Message, text: str, limit_date: date):
 
 def get_price_range(message: Message) -> None:
 
+    if queries[message.chat.id].distance_units == 'miles':
+        distance_unt = 'в миллях'
+    elif queries[message.chat.id].distance_units == 'km':
+        distance_unt = 'в километрах'
+    else:
+        distance_unt = 'в миллях'
+
     try:
         prices = list(map(int, message.text.split()))
 
@@ -136,7 +149,7 @@ def get_price_range(message: Message) -> None:
         else:
             queries[message.chat.id].min_price = min(prices)
         queries[message.chat.id].max_price = max(prices)
-        bot.send_message(message.chat.id, 'Введите максимальное расстояние от центра:')
+        bot.send_message(message.chat.id, f'Введите максимальное расстояние от центра ({distance_unt}):')
         bot.register_next_step_handler(message, get_max_distance)
     except (TypeError, ValueError):
         bot.send_message(message.chat.id, '❌ Вы неправильно ввели диапазон... Попробуйте еще раз!')

@@ -1,10 +1,13 @@
 import sqlite3 as sq
 import os
 
+import logs.logs as log
+
 from telebot.types import Message
 from loader import QueryContainer
 from utils.format import format_history
-from typing import List
+from typing import List, Callable
+from functools import wraps
 from datetime import datetime, timedelta
 
 
@@ -16,6 +19,20 @@ def get_path() -> str:
     return db_path
 
 
+def db_track_exception(func: Callable) -> Callable:
+    """Декоратор для отслеживания исключений связанных с базой данных"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except sq.Error as exc:
+            print(f'{datetime.now()} Ошибка базы данных в функции {__name__}.{func.__name__}:', exc)
+            log.error_log(exc, 'Ошибка базы данных', f'{__name__}.{func.__name__}')
+            raise sq.Error
+    return wrapper
+
+
+@db_track_exception
 def check_user_settings(message: Message):
     with sq.connect(get_path()) as connect:
         cursor = connect.cursor()
@@ -27,6 +44,7 @@ def check_user_settings(message: Message):
             cursor.execute(f'INSERT INTO settings (user_id) VALUES ({int(message.chat.id)})')
 
 
+@db_track_exception
 def check_sql_tables() -> None:
     with sq.connect(get_path()) as con:
         cursor = con.cursor()
@@ -55,6 +73,7 @@ def check_sql_tables() -> None:
         print('Table "queries" -> OK')
 
 
+@db_track_exception
 def write_history(query: QueryContainer) -> None:
 
     user_id = query.user
@@ -83,6 +102,7 @@ def write_history(query: QueryContainer) -> None:
         )
 
 
+@db_track_exception
 def read_history(message: Message, depth: int) -> List:
 
     date_filter = (datetime.now().date() - timedelta(depth)).strftime('%Y-%m-%d')
@@ -109,6 +129,7 @@ def read_history(message: Message, depth: int) -> List:
     return result
 
 
+@db_track_exception
 def set_locale(message: Message, locale: str) -> None:
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
@@ -117,6 +138,7 @@ def set_locale(message: Message, locale: str) -> None:
         )
 
 
+@db_track_exception
 def set_currency(message: Message, currency: str) -> None:
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
@@ -125,6 +147,7 @@ def set_currency(message: Message, currency: str) -> None:
         )
 
 
+@db_track_exception
 def get_locale(message: Message) -> str:
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
@@ -137,6 +160,7 @@ def get_locale(message: Message) -> str:
     return result[0]
 
 
+@db_track_exception
 def get_currency(message: Message) -> str:
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
@@ -147,7 +171,3 @@ def get_currency(message: Message) -> str:
         result = cursor.fetchone()
 
     return result[0]
-
-
-if __name__ == '__main__':
-    print(get_path())
