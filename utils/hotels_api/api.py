@@ -1,15 +1,18 @@
 import requests
 import json
-from typing import Dict, Callable
-from logs import error_log
-from CustomExceptions import ApiRequestError
+
+import logs.logs as log
+
+from typing import Dict, Tuple, Callable, Optional
+from utils.CustomExceptions import ApiRequestError
 from functools import wraps
 from datetime import datetime
+from config_data.config import API_KEY, API_HOST
 
 
 headers = {
-    "X-RapidAPI-Host": "hotels4.p.rapidapi.com",
-    "X-RapidAPI-Key": "bae1651a05msh66bdf614f9bc0e9p1a06dfjsn581c7e145db3"
+    "X-RapidAPI-Host": API_HOST,
+    "X-RapidAPI-Key": API_KEY
     }
 
 
@@ -20,7 +23,7 @@ def track_api_exception(func: Callable) -> Callable:
         try:
             return func(*args, **kwargs)
         except (requests.ConnectionError, requests.HTTPError, requests.Timeout) as exc:
-            error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{func.__name__}')
+            log.error_log(exc, 'Ошибка при работе с requests', f'{__name__}.{func.__name__}')
             print(f'{datetime.now()} Ошибка при работе с requests:', exc)
             raise ApiRequestError
     return wrapper
@@ -61,15 +64,17 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
 
 
 @track_api_exception
-def hotels_by_destination(destination_id, check_in, check_out, language='en_US', sort_order='PRICE'):
-    # querystring = {
-    #     "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": "2022-06-20",
-    #     "checkOut": "2022-07-10", "adults1": "1", "sortOrder": sort_order, "locale": language, "currency": "USD"
-    # }
+def hotels_by_destination(
+        destination_id: str, check_in: str, check_out: str, locale: str = 'en_US',
+        sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None, currency: str = 'USD') -> Dict:
+
     querystring = {
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,
-        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": "en_US", "currency": "USD"
+        "checkOut": check_out, "adults1": "1", "sortOrder": sort_order, "locale": locale, "currency": currency
     }
+    if price_range is not None:
+        querystring['priceMin'] = str(price_range[0])
+        querystring['priceMax'] = str(price_range[1])
     print(querystring)
 
     request = requests.get(
@@ -83,26 +88,3 @@ def hotels_by_destination(destination_id, check_in, check_out, language='en_US',
     data = json.loads(request.text)
 
     return data
-
-
-# для тэстов
-# def get_photo_data(hotel_id: str = '634418464') -> Dict:
-#     with open('photo_634418464.json', 'r') as file:
-#         data = json.load(file)
-#
-#     return data
-
-
-# для тестов
-# def get_destinations():
-#     with open('result.json', 'r') as file:
-#         data = json.load(file)
-#     return data
-
-
-# для тестов
-# def hotels_by_destination(destination_id):
-#     with open(f'hotels_{destination_id}.json', 'r') as file:
-#         data = json.load(file)
-#
-#     return data
