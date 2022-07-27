@@ -101,6 +101,7 @@ def format_photo(photo: Dict, size) -> str:
 
 def parse_history_data(data: List) -> List[str]:
     result = list()
+    # TODO нейминг
     for elem in data:
         params_data = eval(elem["params"])
         params = list()
@@ -124,3 +125,5 @@ def parse_history_data(data: List) -> List[str]:
         result.append('\n'.join(res_string))
 
     return result
+
+# TODO добавить документацию

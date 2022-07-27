@@ -258,3 +258,7 @@ def print_hotels(message: Message) -> None:
                 parse_mode='HTML', reply_markup=markup
             )
     print_start_message(message)
+
+# TODO вынести файл в определенный модуль из корня проекта
+# TODO дописать документацию всем функциям
+

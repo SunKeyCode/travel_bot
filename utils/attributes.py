@@ -64,3 +64,5 @@ def destinations_dict(request_data: Dict) -> Dict[str, str]:
 @track_key_error
 def get_hotel_id(hotel: Dict) -> str:
     return hotel['id']
+
+# TODO добавить документацию

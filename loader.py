@@ -78,3 +78,5 @@ class QueryContainer:
 
 
 queries: Dict[int, QueryContainer] = dict()
+
+# TODO добавить документацию

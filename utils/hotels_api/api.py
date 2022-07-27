@@ -88,3 +88,5 @@ def hotels_by_destination(
     data = json.loads(request.text)
 
     return data
+
+# TODO добавить документацию

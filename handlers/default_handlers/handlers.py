@@ -54,4 +54,4 @@ def other_text(message: Message) -> None:
     bot.send_message(message.chat.id, 'Такая команда мне не понятна...')
 
 
-
+# TODO добавить документацию

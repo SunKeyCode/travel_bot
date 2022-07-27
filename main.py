@@ -16,6 +16,8 @@ while True:
     try:
         bot.polling(none_stop=True, interval=0)
         break
+    # TODO базовые исключения не ловим
+    # TODO объявите свое от Exception и ловите его
     except Exception as exc:
         print('Возникло непредвиденное исключение в модуле main:', exc)
         log.error_log(exc, 'Непредвиденное исключение в модуле main')

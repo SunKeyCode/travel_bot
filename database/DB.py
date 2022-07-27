@@ -171,3 +171,5 @@ def get_currency(message: Message) -> str:
         result = cursor.fetchone()
 
     return result[0]
+
+# TODO добавить документацию
