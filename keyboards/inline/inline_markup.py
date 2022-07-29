@@ -1,7 +1,7 @@
 import calendar
 import locale
 
-from typing import Optional
+from typing import Optional, List
 from loader import Locale, Currency
 from datetime import date, timedelta
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -26,6 +26,13 @@ MONTHS = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
 
 def settings_markup(mode: str = 'main', current: Optional[str] = None) -> InlineKeyboardMarkup:
+    """
+    Создает кнопки меню settings.
+    :param mode: страница меню для которого создаются кнопки (может принимать значения main, locale, currency)
+    :param current: текущее значение в БД (помечается при создании кнопки)
+    :return: markup
+    :rtype: InlineKeyboardMarkup
+    """
     markup = InlineKeyboardMarkup()
     if mode == 'main':
         markup.add(InlineKeyboardButton('язык запросов (locale)', callback_data='settings:main:locale'))
@@ -50,6 +57,7 @@ def settings_markup(mode: str = 'main', current: Optional[str] = None) -> Inline
 
 
 def yes_no_markup() -> InlineKeyboardMarkup:
+    """Кнопки да/нет для фотографий отеля"""
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton('✅ Да', callback_data=photo_callback.new(answer='yes')))
     markup.add(InlineKeyboardButton('❌ Нет', callback_data=photo_callback.new(answer='no')))
@@ -57,7 +65,13 @@ def yes_no_markup() -> InlineKeyboardMarkup:
     return markup
 
 
-def destination_markup(destinations):
+def destination_markup(destinations: List) -> InlineKeyboardMarkup:
+    """
+    Формирует кнопки для выбора города.
+    :param destinations: список, содержащий все найденные варианты по запросу пользователя.
+    :return: markup
+    :rtype: InlineKeyboardMarkup
+    """
     markup = InlineKeyboardMarkup()
     for item in destinations:
         markup.add(InlineKeyboardButton(
@@ -69,6 +83,13 @@ def destination_markup(destinations):
 
 
 def link_markup(caption: str, url: str):
+    """
+    Кнопка ссылки на страницу отеля.
+    :param caption: заголовок кнопки
+    :param url: url страницы
+    :return: markup
+    :rtype: InlineKeyboardMarkup
+    """
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton(caption, url=url))
 
@@ -76,6 +97,14 @@ def link_markup(caption: str, url: str):
 
 
 def calendar_days_markup(year: int, month: int, limit_date: Optional[date] = None) -> InlineKeyboardMarkup:
+    """
+    Формирует календарь для выбора дат заезда/выезда.
+    :param year: текущий год
+    :param month: месяц
+    :param limit_date: дата, от которой показываем дни в календаре (дни меньше этой даты отображаются пустыми клетками)
+    :return: markup
+    :rtype: InlineKeyboardMarkup
+    """
     keyboard = InlineKeyboardMarkup(row_width=7)
 
     keyboard.add(

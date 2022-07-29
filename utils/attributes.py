@@ -22,6 +22,13 @@ def track_key_error(func: Callable) -> Callable:
 
 @track_key_error
 def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[dict]:
+    """
+    Получает список с данными об отелях из словаря содержащего ответ сервера.
+    :param data: словарь, содержащий ответ от сервера.
+    :param limit: количество отелей, которое необходимо вернуть в списке.
+    :param max_distance: фильтр по максимальному расстоянию от центра (используется в команде bestdeal)
+    :rtype: List[Dict]
+    """
     if max_distance is not None:
         items = data['data']['body']['searchResults']['results']
         try:
@@ -36,7 +43,7 @@ def hotels(data: Dict, limit: Optional[int] = 100, max_distance=None) -> List[di
 
 @track_key_error
 def photo(data, limit: Optional[int] = None) -> List[dict]:
-
+    """Получает список с данными о фотографиях из словаря содержащего ответ сервера"""
     if limit is None:
         return data['hotelImages']
     else:
@@ -45,6 +52,7 @@ def photo(data, limit: Optional[int] = None) -> List[dict]:
 
 @track_key_error
 def destinations(request_data: Dict) -> List[Dict]:
+    """Получаем список городов из словаря содержащего ответ сервера"""
     for elem in request_data['suggestions'][0]['entities']:
         elem['caption'] = re.sub(r'<[/]?span.*?>', '', elem['caption'])
 
@@ -53,6 +61,7 @@ def destinations(request_data: Dict) -> List[Dict]:
 
 @track_key_error
 def destinations_dict(request_data: Dict) -> Dict[str, str]:
+    """Получает список найденных городов в виде словаря, где ключ - это id города, а значение - название"""
     result = dict()
 
     for elem in request_data['suggestions'][0]['entities']:

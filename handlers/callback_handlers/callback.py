@@ -34,7 +34,7 @@ def calendar_callback(call: CallbackQuery) -> None:
                 message_id=call.message.id,
                 text='❌ Дата заезда не должна быть меньше текущей даты! Попробуем еще раз:'
             )
-            step_functions.get_date(call.message, 'Выберите дату заезда 📅:')
+            step_functions.print_calendar(call.message, 'Выберите дату заезда 📅:')
     else:
         if callback_date > queries[call.message.chat.id].checkin_date:
             queries[call.message.chat.id].checkout_date = callback_date
@@ -45,7 +45,7 @@ def calendar_callback(call: CallbackQuery) -> None:
                 message_id=call.message.id,
                 text='❌ Дата выезда должна быть больше даты заезда! Попробуем еще раз:'
             )
-            step_functions.get_date(
+            step_functions.print_calendar(
                 message=call.message,
                 text='Выберите дату выезда 📅:',
                 limit_date=queries[call.message.chat.id].checkin_date

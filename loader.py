@@ -9,14 +9,14 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 
 class Steps(enum.Enum):
-
+    """Перечисление для обозначения текущего шага"""
     destination = 'destination'
     checkin_date = 'checkin_date'
     checkout_date = 'checkout_date'
 
 
 class Commands(enum.Enum):
-
+    """Перечисление для выбора команды в запросе"""
     lowprice = 'lowprice'
     highprice = 'highprice'
     bestdeal = 'bestdeal'
@@ -24,18 +24,25 @@ class Commands(enum.Enum):
 
 
 class Locale(enum.Enum):
-
+    """Перечисление для языка на котором делаем запрос"""
     en_US = '🇺🇸 Английский'
     ru_RU = '🇷🇺 Русский'
 
 
 class Currency(enum.Enum):
-
+    """Перечисление для валюты"""
     RUB = 'Рубли'
     USD = 'Доллары'
 
 
 class QueryContainer:
+    """
+    Класс описывающий контейнер запроса пользователя
+
+    Args:
+        user_id (int): id пользователя в telegram
+        command (Commands): команда, для которой собираем запрос
+    """
 
     def __init__(self, user_id: int, command: Commands) -> None:
         self.user = user_id
@@ -56,9 +63,10 @@ class QueryContainer:
         self.max_price: Optional[int] = None
         self.max_distance: Optional[float] = None
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Переопределение метода __str__"""
         return 'user={user}\ndestination_id={destination_id}\nhotels={hotels}\nhotel_count={hotel_count}\n' \
-                'get_hotels_count={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n' \
+               'get_hotels_count={show_photo}\nphoto_count={photo_count}\nlang={language}\ncommand={command}\n' \
                'check_in={check_in}\ncheck_out={check_out}\nmin_price={min_price}\nmax_price={max_price}\n' \
                'max_distance={max_distance}\n'.format(
                     user=self.user,
@@ -77,6 +85,7 @@ class QueryContainer:
                     )
 
 
+"""Словарь, содержащий запросы пользователей. Ключом является id пользователя в telegram"""
 queries: Dict[int, QueryContainer] = dict()
 
 # TODO добавить документацию

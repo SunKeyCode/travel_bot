@@ -7,7 +7,8 @@ from typing import Dict, List, Union
 from utils.misc.other_func import format_date
 
 
-def format_price(price: Union[int, str]) -> str:
+def format_price(price: Union[int, float, str]) -> str:
+    """Переводим значение цены к строке и заменяем ',' на '.' если необходимо"""
     if not isinstance(price, str):
         price = '{price:,d}'.format(price=price)
     if price.count(','):
@@ -17,6 +18,7 @@ def format_price(price: Union[int, str]) -> str:
 
 
 def format_hotel(hotel: Dict, date_delta: int, currency: str) -> str:
+    """Формируем строку из данных отеля для вывода в сообщение чата"""
     if currency == 'USD':
         currency = '$'
     elif currency == 'RUB':
@@ -63,6 +65,7 @@ def format_hotel(hotel: Dict, date_delta: int, currency: str) -> str:
 
 
 def format_history(hotel: Dict, currency: str) -> str:
+    """Формируем строку из дынных об отеле для записи в БД"""
     if currency == 'USD':
         currency = '$'
     elif currency == 'RUB':
@@ -91,6 +94,7 @@ def format_history(hotel: Dict, currency: str) -> str:
 
 
 def format_photo(photo: Dict, size) -> str:
+    """Формируем строку с url фотографии для вывода сообщение чата"""
     try:
         return photo['baseUrl'].format(size=size)
     except KeyError as exc:
@@ -100,7 +104,8 @@ def format_photo(photo: Dict, size) -> str:
 
 
 def parse_history_data(data: List) -> List[str]:
-    result = list()
+    """Преобразует список записей из БД (в виде словарей) в список строк для вывода в сообщение чата"""
+    records = list()
     # TODO нейминг
     for elem in data:
         params_data = eval(elem["params"])
@@ -122,8 +127,8 @@ def parse_history_data(data: List) -> List[str]:
         res_string.append(f'<u>Параметры запроса:</u>\n{params}')
         res_string.append(f'\n<u>Результат:</u>\n{elem["result"]}')
 
-        result.append('\n'.join(res_string))
+        records.append('\n'.join(res_string))
 
-    return result
+    return records
 
 # TODO добавить документацию

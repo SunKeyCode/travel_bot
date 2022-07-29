@@ -31,6 +31,7 @@ def track_api_exception(func: Callable) -> Callable:
 
 @track_api_exception
 def get_photo(hotel_id: str) -> Dict:
+    """Получает фотографии отеля по его id в виде словаря"""
     querystring = {"id": hotel_id}
 
     request = requests.get(
@@ -48,6 +49,7 @@ def get_photo(hotel_id: str) -> Dict:
 
 @track_api_exception
 def get_destinations(destination: str, language: str = 'en_US') -> Dict:
+    """Получает варианты городов (пунктов назначения) найденные по запросу пользователя в виде словаря"""
     querystring = {"query": destination, "locale": language, "currency": "USD"}
 
     request = requests.get(
@@ -67,6 +69,7 @@ def get_destinations(destination: str, language: str = 'en_US') -> Dict:
 def hotels_by_destination(
         destination_id: str, check_in: str, check_out: str, locale: str = 'en_US',
         sort_order: str = 'PRICE', price_range: Optional[Tuple[int]] = None, currency: str = 'USD') -> Dict:
+    """Получаем отели по id города (пункта назначения) в виде словаря"""
 
     querystring = {
         "destinationId": destination_id, "pageNumber": "1", "pageSize": "25", "checkIn": check_in,

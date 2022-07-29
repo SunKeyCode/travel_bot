@@ -6,12 +6,13 @@ import logs.logs as log
 from telebot.types import Message
 from loader import QueryContainer
 from utils.format import format_history
-from typing import List, Callable
+from typing import List, Callable, Dict
 from functools import wraps
 from datetime import datetime, timedelta
 
 
 def get_path() -> str:
+    """Получение пути к файлу БД"""
     directory = 'database'
     file = 'tet_bot.db'
     db_path = os.path.join(directory, file)
@@ -33,7 +34,8 @@ def db_track_exception(func: Callable) -> Callable:
 
 
 @db_track_exception
-def check_user_settings(message: Message):
+def check_user_settings(message: Message) -> None:
+    """Проверка есть ли запись о пользователе в таблицу settings"""
     with sq.connect(get_path()) as connect:
         cursor = connect.cursor()
 
@@ -46,6 +48,7 @@ def check_user_settings(message: Message):
 
 @db_track_exception
 def check_sql_tables() -> None:
+    """Проверка существования таблиц settings и queries"""
     with sq.connect(get_path()) as con:
         cursor = con.cursor()
         cursor.execute(
@@ -75,7 +78,7 @@ def check_sql_tables() -> None:
 
 @db_track_exception
 def write_history(query: QueryContainer) -> None:
-
+    """Запись запроса пользователя в БД"""
     user_id = query.user
     command = query.command.value
     date = datetime.now().date().strftime('%Y-%m-%d')
@@ -103,8 +106,8 @@ def write_history(query: QueryContainer) -> None:
 
 
 @db_track_exception
-def read_history(message: Message, depth: int) -> List:
-
+def read_history(message: Message, depth: int) -> List[Dict]:
+    """Чтение истории из БД за последние depth дней"""
     date_filter = (datetime.now().date() - timedelta(depth)).strftime('%Y-%m-%d')
 
     with sq.connect(get_path()) as sql_connect:
@@ -131,6 +134,7 @@ def read_history(message: Message, depth: int) -> List:
 
 @db_track_exception
 def set_locale(message: Message, locale: str) -> None:
+    """Запись locale в таблицу settings"""
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
         cursor.execute(
@@ -140,6 +144,7 @@ def set_locale(message: Message, locale: str) -> None:
 
 @db_track_exception
 def set_currency(message: Message, currency: str) -> None:
+    """Запись currency в таблицу settings"""
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
         cursor.execute(
@@ -149,6 +154,7 @@ def set_currency(message: Message, currency: str) -> None:
 
 @db_track_exception
 def get_locale(message: Message) -> str:
+    """Получение locale из таблицы settings"""
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
         cursor.execute(
@@ -162,6 +168,7 @@ def get_locale(message: Message) -> str:
 
 @db_track_exception
 def get_currency(message: Message) -> str:
+    """Получение currency из таблицы settings"""
     with sq.connect(get_path()) as sql_connect:
         cursor = sql_connect.cursor()
         cursor.execute(
