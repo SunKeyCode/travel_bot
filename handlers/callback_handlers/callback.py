@@ -1,9 +1,9 @@
 from telebot.types import CallbackQuery
 
-import step_functions
 import keyboards.inline.inline_markup as inline_markup
 import database.DB as DB
 
+from steps import step_functions
 from loader import bot, queries, Steps
 from config_data import config
 from datetime import date

@@ -78,7 +78,6 @@ def hotels_by_destination(
     if price_range is not None:
         querystring['priceMin'] = str(price_range[0])
         querystring['priceMax'] = str(price_range[1])
-    print(querystring)
 
     request = requests.get(
         'https://hotels4.p.rapidapi.com/properties/list',

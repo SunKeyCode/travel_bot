@@ -1,5 +1,5 @@
 from telebot.types import Message
-from step_functions import print_start_message, first_step
+from steps.step_functions import print_start_message, first_step
 from loader import bot, Commands
 from database import DB
 from keyboards.inline import inline_markup
@@ -10,7 +10,9 @@ from config_data import config
 @bot.message_handler(commands=['start'])
 def start_command(message: Message) -> None:
     """Обработчик команды start"""
-    bot.send_message(message.chat.id, 'Привет! Я бот, начинаем!')  # дописать приветствие
+    bot.send_message(message.chat.id, 'Привет! Я бот поиска отелей на сайте Hotels.com. Ищите отели в '
+                                      'интересующем Вас городе по заданным параметрам (цена, расстояние от центра, '
+                                      'дата заезда/выезда и т.д.).')
     print_start_message(message)
     DB.check_user_settings(message)
 

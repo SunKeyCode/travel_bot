@@ -1,0 +1,4 @@
+/.env
+/database/tet_bot.db
+/logs/error_log.json
+/venv/

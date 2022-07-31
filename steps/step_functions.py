@@ -265,7 +265,9 @@ def print_hotels(message: Message) -> None:
                 message.chat.id, format.format_hotel(i_hotel, date_delta.days, currency),
                 parse_mode='HTML', reply_markup=markup
             )
+
     print_start_message(message)
+    queries.pop(message.chat.id)
 
 # TODO вынести файл в определенный модуль из корня проекта
 # TODO дописать документацию всем функциям
