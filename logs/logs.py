@@ -5,6 +5,7 @@ from typing import Optional
 
 
 def get_path() -> str:
+    """Получает путь к файлу логов"""
     directory = 'logs'
     file = 'error_log.json'
     db_path = os.path.join(directory, file)
@@ -13,7 +14,7 @@ def get_path() -> str:
 
 
 def error_log(exc: Exception, error_message: str, func: Optional[str] = None) -> None:
-
+    """Записывает ошибки в файл"""
     path = get_path()
 
     if os.path.exists(os.path.abspath(path)):
