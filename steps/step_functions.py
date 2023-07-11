@@ -15,7 +15,10 @@ from config_data import config
 
 
 def track_exception(func: Callable) -> Callable:
-    """Декоратор для отслеживания исключений KeyError, ApiRequestError и UnexpectedException"""
+    """
+    Декоратор для отслеживания исключений KeyError, ApiRequestError и
+    UnexpectedException
+    """
     @functools.wraps(func)
     def wrapper(message: Message, *args, **kwargs):
         try:
@@ -268,7 +271,3 @@ def print_hotels(message: Message) -> None:
 
     print_start_message(message)
     queries.pop(message.chat.id)
-
-# TODO вынести файл в определенный модуль из корня проекта
-# TODO дописать документацию всем функциям
-

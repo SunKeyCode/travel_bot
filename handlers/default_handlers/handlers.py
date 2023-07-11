@@ -60,7 +60,7 @@ def settings(message: Message) -> None:
 
 @bot.message_handler(content_types='text')
 def other_text(message: Message) -> None:
-    """Обработчик теста, который не является командой"""
+    """Обработчик текста, который не является командой"""
     bot.send_message(message.chat.id, 'Такая команда мне не понятна...')
 
 

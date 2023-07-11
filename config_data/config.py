@@ -9,6 +9,7 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 API_KEY = os.getenv('API_KEY')
 API_HOST = "hotels4.p.rapidapi.com"
 
+DEBUG = True
 MAX_HOTELS = 10
 MAX_PHOTO = 10
 HISTORY_DEPTH = 2

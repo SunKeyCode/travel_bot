@@ -9,7 +9,7 @@
 - реализация запросов к api hotels4.p.rapidapi.com) с помощью библиотеки requests
 - реализация пользовательского интерфейса с помощью библиотеки PyTelegramBotApi
 
-### Стек техгологий:
+### Стек технологий:
 
 - PyTelegramBotApi
 - Requests
