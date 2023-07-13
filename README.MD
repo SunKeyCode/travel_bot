@@ -21,3 +21,10 @@
 
 **Примеры использования:**
 
+<img src="./readme_assets/bot_start.jpg" alt="bot starts" width="50%">
+
+<img src="./readme_assets/bot_commands.PNG" alt="bot commands" width="50%">
+
+<img src="./readme_assets/bot_hotels_1.jpg" alt="hotel image 1" width="50%">
+
+<img src="./readme_assets/bot_hotels_2.jpg" alt="hotel image 2" width="50%">
