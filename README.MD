@@ -21,6 +21,7 @@
 
 **Примеры использования:**
 
+<p align=""center>
 <img src="./readme_assets/bot_start.jpg" alt="bot starts" width="25%">
 
 <img src="./readme_assets/bot_commands.PNG" alt="bot commands" width="25%">
@@ -28,3 +29,4 @@
 <img src="./readme_assets/bot_hotels_1.jpg" alt="hotel image 1" width="25%">
 
 <img src="./readme_assets/bot_hotels_2.jpg" alt="hotel image 2" width="25%">
+</p>
